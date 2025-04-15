@@ -138,10 +138,10 @@ memset(buf, 0, 0x300uLL);
 v12 = read(v13, buf, 0x600uLL);
 </code></pre><p>Do chương trình có NX, vì vậy hướng tiếp cận sẽ không phải là ret2shellcode.</p>
 <h3 id="ii-exploitation">II. Exploitation</h3>
-<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:
-</p>
-<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.
-</p>
+<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:</p>
+<p></p>
+<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.</p>
+<p></p>
 <p>Có sẵn một gadget rất đẹp ở đây. Tuy nhiên ở đây thì mình sợ rằng việc overflow sẽ khiến một vài hàm đặc biệt kiểm tra tình trạng kết nối làm mất connection nên để an toàn mình stack pivot sang một vùng có quyền rw, và do cũng không có PIE nên mình dễ dàng bổ sung vào payload các gadget để stack pivot và thực hiển read một lần nữa. Mình tìm thêm gadget pop_rbp và gadget leave_ret. Payload đầu tiên để leak libc_base và yêu cầu hàm read thêm 1 lần nữa.</p>
 <pre tabindex="0"><code>payload=b&#39;A&#39;*840
 payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)
@@ -1079,8 +1079,8 @@ if __name__ == &#39;__main__&#39;:
 <p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
 <p></p>
 <p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p>
-<p></p>
-<p>Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
+<p>
+Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
 <h3 id="2-patch-byte">2. Patch byte</h3>
 <p>Mình patch toàn bộ lệnh gọi hàm sub_401775 bằng nop.</p>
 <p></p>

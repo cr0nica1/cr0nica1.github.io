@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>SwampCTF 2025 - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="http://localhost:1313/posts/swampctf/">
+  <meta property="og:site_name" content="Cr0nica1">
+  <meta property="og:title" content="SwampCTF 2025">
+  <meta property="og:description" content="Đây là một giải có thể nói đặc biệt vì đa phần các chall reversing của nó đều quá tricky mà không yêu cầu nhiều về khả năng logic dịch ngược.
+Midi Melody - rev 1. Static Analysis Chương trình là một phần mềm sinh ra file midi từ các input đầu vào. Khi khởi chạy cần có tham số dòng lệnh.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-16T03:23:19+07:00">
+    <meta property="article:modified_time" content="2025-04-16T03:23:19+07:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SwampCTF 2025">
+  <meta name="twitter:description" content="Đây là một giải có thể nói đặc biệt vì đa phần các chall reversing của nó đều quá tricky mà không yêu cầu nhiều về khả năng logic dịch ngược.
+Midi Melody - rev 1. Static Analysis Chương trình là một phần mềm sinh ra file midi từ các input đầu vào. Khi khởi chạy cần có tham số dòng lệnh.">
+<meta name="application-name" content="Cr0nica1">
+<meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://localhost:1313/posts/swampctf/" /><link rel="prev" href="http://localhost:1313/posts/htb/" /><link rel="next" href="http://localhost:1313/posts/breach/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="/lib/fontawesome-free/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" href="/lib/animate/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "SwampCTF 2025",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/posts\/swampctf\/"
+        },"genre": "posts","wordcount":  703 ,
+        "url": "http:\/\/localhost:1313\/posts\/swampctf\/","datePublished": "2025-04-16T03:23:19+07:00","dateModified": "2025-04-16T03:23:19+07:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "cr0nica1"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('dark' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'dark' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Cr0nica1"><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="search..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Cr0nica1"><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="search..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">SwampCTF 2025</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-04-16">2025-04-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;703 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#midi-melody---rev">Midi Melody - rev</a>
+      <ul>
+        <li><a href="#1-static-analysis">1. Static Analysis</a></li>
+        <li><a href="#2-reverse">2. Reverse</a></li>
+        <li><a href="#3-script">3. Script</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Đây là một giải có thể nói đặc biệt vì đa phần các chall reversing của nó đều quá tricky mà không yêu cầu nhiều về khả năng logic dịch ngược.</p>
+<h2 id="midi-melody---rev">Midi Melody - rev</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i1.png"
+        data-srcset="/swamp/i1.png, /swamp/i1.png 1.5x, /swamp/i1.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i1.png"
+        title="alt text" /></p>
+<p>Chương trình là một phần mềm sinh ra file midi từ các input đầu vào. Khi khởi chạy cần có tham số dòng lệnh.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i2.png"
+        data-srcset="/swamp/i2.png, /swamp/i2.png 1.5x, /swamp/i2.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i2.png"
+        title="alt text" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i3.png"
+        data-srcset="/swamp/i3.png, /swamp/i3.png 1.5x, /swamp/i3.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i3.png"
+        title="alt text" /></p>
+<p>Chương trình sẽ lấy các giá trị tham số từ tham số thứ 2 trở đi, dựa vào giá trị của từng tham số mà thực hiện thao tác với các mảng v13, v14.</p>
+<p>Ứng với mỗi giá trị m,j,d; chương trình sẽ đẩy tương ứng một giá trị của mảng v13 và mảng v14 tương ứng vào một vùng nhớ cấp phát động v12.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i4.png"
+        data-srcset="/swamp/i4.png, /swamp/i4.png 1.5x, /swamp/i4.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i4.png"
+        title="alt text" /></p>
+<p>Cuối cùng chương trình ghi lần lượt các giá trị ptr, giá trị trong mảng cấp phát động v12 và giá trị v15 vào file audio.midi. Như vậy phương án của chúng ta là reversing chương trình tìm lại flag ban đầu.</p>
+<h3 id="2-reverse">2. Reverse</h3>
+<p>Chúng ta đã biết rằng phần đầu tiên của file midi sẽ là giá trị ptr, phần cuối của file midi sẽ là v15. Vì vậy, mình sẽ bỏ hai phần này và tách phần ở giữa, nơi chứa các giá trị để chuyển thành flag ban đầu.</p>
+<pre tabindex="0"><code>def parse_midi(data):
+    header_size = 0x16  
+    track_data = data[header_size:-4]  
+    extracted_values = [struct.unpack(&#34;&lt;I&#34;, track_data[i:i+4])[0] for i in range(0, len(track_data), 4)]
+    return extracted_values
+</code></pre><p>Dựa vào logic ghi dữ liệu vào file audio.midi từ chương trình midiGEN, mình đảo ngược nó để so khớp với các flag.</p>
+<p>Đối với &lsquo;-j&rsquo;:</p>
+<pre tabindex="0"><code>expected_j = v13[v4 % 10]
+if note_val == expected_j:
+    flags.append(&#34;-j&#34;)
+    v4 += 1
+    continue
+</code></pre><p>Đối với &ldquo;-m&rdquo;:</p>
+<pre tabindex="0"><code>expected_normal = v14[v4 % 22]
+if note_val == expected_normal:
+    flags.append(&#34;-m&#34;)
+    v4 += 1
+</code></pre><p>Đối với &ldquo;-r&rdquo;:</p>
+<pre tabindex="0"><code>elif note_val == v14[0]:
+    flags.append(&#34;-r&#34;)
+    v4 = 1  # Reset lại bộ đếm
+</code></pre><p>Kết quả flag thu được là:</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i5.png"
+        data-srcset="/swamp/i5.png, /swamp/i5.png 1.5x, /swamp/i5.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i5.png"
+        title="alt text" /></p>
+<p>Lưu ý rằng, chương trình sẽ chỉ đọc từ tham số thứ 2, do vậy thêm 1 trong 3 flag &lsquo;-m&rsquo;,&rsquo;-j&rsquo;,&rsquo;-r&rsquo; ở tham số đầu tiên thì đều tạo ra 1 file như nhau. Mình sẽ thử với cả 3 TH này. Tuy nhiên trước hết, chúng ta để ý ở phần help:
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i6.png"
+        data-srcset="/swamp/i6.png, /swamp/i6.png 1.5x, /swamp/i6.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i6.png"
+        title="alt text" /></p>
+<p>&lsquo;-m&rsquo; kí hiệu là &lsquo;-&rsquo;
+&lsquo;-j&rsquo; kí hiêu là &lsquo;.&rsquo;
+&lsquo;-r&rsquo; kí hiệu là &rsquo; '</p>
+<p>mình thử thay vào thì được chuỗi
+<code>.. .-- .- -- .--. -.-. - ..-.  -- .---- -.. .---- -....- .-- .- ... -. - -....- - .... .- - -....- .... .--.-. .-. -..</code>
+Chuỗi này mình tra thì biết được nó là mã Morse (:v), tuy nhiên như đã nói ở trên đây là kết quả sinh ra từ tham số thứ 2 trở đi, do vậy mình đã thử cả 3 TH tham số đầu tiên để giải mã Morse và thu được.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/swamp/i7.png"
+        data-srcset="/swamp/i7.png, /swamp/i7.png 1.5x, /swamp/i7.png 2x"
+        data-sizes="auto"
+        alt="/swamp/i7.png"
+        title="alt text" /></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>#!/usr/bin/env python3
+import struct
+import os
+
+v14 = [
+    1614843904, 1614843994, 1614839824, 1614843994, 1614581882, 1614843994,
+    1615040634, 1615036538, 1614254202, 1615036538, 1615368314, 1615036506,
+    1614254202, 1615036506, 1614057594, 1615036506, 1614385274, 1614516346,
+    1614450810, 1614385226, 1615036506, 8106106
+]
+v13 = [
+    1615499264, 1615368276, 1615499348, 1615171711, 1615040639,
+    1615499264, 1615368276, 1615499348, 1615171711, 1615040639
+]
+
+HEADER_SIZE = 22  
+FOOTER_SIZE = 4  
+
+def read_int32_le(b):
+    return struct.unpack(&#34;&lt;I&#34;, b)[0]
+
+def reverse_audio_midi(filename=&#34;audio.midi&#34;):
+    with open(filename, &#34;rb&#34;) as f:
+        data = f.read()
+
+    if len(data) &lt; HEADER_SIZE + FOOTER_SIZE:
+        print(&#34;File quá nhỏ để chứa dữ liệu hợp lệ.&#34;)
+        return
+
+    header = data[:HEADER_SIZE]
+    footer = data[-FOOTER_SIZE:]
+    note_data = data[HEADER_SIZE:-FOOTER_SIZE]
+
+    note_count = len(note_data) // 4
+    print(f&#34;Đã đọc được {note_count} lệnh ghi (note) từ file.&#34;)
+
+    expected_footer = 3145472
+    footer_val = read_int32_le(footer)
+    if footer_val != expected_footer:
+        print(f&#34;Cảnh báo: Footer không khớp (được ghi {footer_val}, mong đợi {expected_footer}).&#34;)
+    else:
+        print(&#34;Footer hợp lệ.&#34;)
+    v4 = 0
+    flags = [] 
+    
+    for i in range(note_count):
+        note_bytes = note_data[i*4:(i+1)*4]
+        note_val = read_int32_le(note_bytes)
+
+     
+        expected_j = v13[v4 % 10]
+        if note_val == expected_j:
+            flags.append(&#34;-j&#34;)
+            v4 += 1
+            continue
+
+        
+        expected_normal = v14[v4 % 22]
+        if note_val == expected_normal:
+           
+            flags.append(&#34;-m&#34;)
+            v4 += 1
+        elif note_val == v14[0]:
+           
+            flags.append(&#34;-r&#34;)
+            v4 = 1  
+        else:
+            print(f&#34;Không nhận dạng được note thứ {i+1}: giá trị = {note_val}&#34;)
+            flags.append(&#34;UNKNOWN&#34;)
+           
+
+    print(&#34;\nChuỗi flag phục hồi (tương ứng argv[2:]):&#34;)
+    print(&#34; &#34;.join(flags))
+
+if __name__ == &#34;__main__&#34;:
+ 
+    import sys
+    filename = sys.argv[1] if len(sys.argv) &gt; 1 else &#34;audio.midi&#34;
+    if not os.path.exists(filename):
+        print(f&#34;Không tìm thấy file {filename}&#34;)
+    else:
+        reverse_audio_midi(filename)
+</code></pre></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-04-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://localhost:1313/posts/swampctf/" data-title="SwampCTF 2025"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://localhost:1313/posts/swampctf/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="http://localhost:1313/posts/swampctf/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://localhost:1313/posts/swampctf/" data-title="SwampCTF 2025"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="http://localhost:1313/posts/swampctf/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/htb/" class="prev" rel="prev" title="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</a>
+            <a href="/posts/breach/" class="next" rel="next" title="Breach CTF 2025">Breach CTF 2025<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/lightgallery/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lightgallery.min.js"></script><script type="text/javascript" src="/lib/lightgallery/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="/lib/lightgallery/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/typeit/index.umd.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/contrib/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/contrib/copy-tex.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":80},"comment":{},"data":{"id-1":"Cr0nica1","id-2":"Cr0nica1"},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":true,"left":"$$","right":"$$"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"},{"display":false,"left":"$","right":"$"}],"strict":false},"search":{"highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

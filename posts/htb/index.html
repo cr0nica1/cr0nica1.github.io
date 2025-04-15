@@ -134,11 +134,11 @@ Writeup Singlestep - rev 1. Static Analysis Load file vào IDA, chúng ta nhận
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png, http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png 1.5x, http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png 2x"
+        data-src="/htb/i1.png"
+        data-srcset="/htb/i1.png, /htb/i1.png 1.5x, /htb/i1.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png"
-        title="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png" /></p>
+        alt="/htb/i1.png"
+        title="alt text" /></p>
 <p>Ở bên trong này, chúng ta thấy một đoạn dài mã thực thi thuộc section .text mà IDA không đọc được code x64 asm. Nhìn vào các lệnh xor, mình nhận ra rằng chương trình sẽ giải mã các vùng mã không đọc được đó bằng xor, thực thi lệnh ở đó rồi lại xor lại để mã hóa 1 lần nữa. Do vậy đoạn mã này chỉ có thể đọc được trong runtime, không thể đọc được bằng cách disassemble thông thường. Cách duy nhất mình nghĩ được là lưu lại code được giải mã trong khi debug, tuy nhiên sẽ rất mất thời gian nên mình phải sử dụng script (được tài trợ bởi anh shynt_ :v) để lưu lại những đoạn code được deobfucasting trong khi chạy. Do mình quan tâm đến đoạn code từ sau khi nhập input nên mình sẽ deobfuscating kể từ đoạn yêu cầu nhập input. Lưu ý rằng trong tất cả các string được in ra màn hình, chỉ có duy nhất 1 string gọi printf là &ldquo;Please enter the ✨ secret ✨ bequeathed to his cult following:&rdquo;, do vậy script sẽ deobfuscating từ printf trong got.plt.</p>
 <pre tabindex="0"><code>import gdb
 
@@ -184,11 +184,11 @@ finally:
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png, http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png 1.5x, http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png 2x"
+        data-src="/htb/i2.png"
+        data-srcset="/htb/i2.png, /htb/i2.png 1.5x, /htb/i2.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png"
-        title="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png" /></p>
+        alt="/htb/i2.png"
+        title="alt text" /></p>
 <p>Mình vào file log.txt, cắt script kể từ đoạn này cho đến khi chương trình gọi lệnh puts. Đây sẽ là phần logic chính của chương trình.</p>
 <pre tabindex="0"><code>=&gt; 0x55555555b0a2:	mov    DWORD PTR [rbp-0x27c],eax
 =&gt; 0x55555555b0d9:	cmp    DWORD PTR [rbp-0x27c],0x0
@@ -758,20 +758,20 @@ ZF !=0 {
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png, http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png 1.5x, http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png 2x"
+        data-src="/htb/i3.png"
+        data-srcset="/htb/i3.png, /htb/i3.png 1.5x, /htb/i3.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png"
-        title="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png" /></p>
+        alt="/htb/i3.png"
+        title="alt text" /></p>
 <p>Như vậy input phải thỏa mãn là ma trận nghịch đảo của ma trận này. Mình tìm ma trận nghịch đảo, truy ngược về password và nhập lại thì mình tìm được flag.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png, http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png 1.5x, http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png 2x"
+        data-src="/htb/i4.png"
+        data-srcset="/htb/i4.png, /htb/i4.png 1.5x, /htb/i4.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png"
-        title="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png" /></p>
+        alt="/htb/i4.png"
+        title="alt text" /></p>
 <h3 id="3-script">3. Script</h3>
 <pre tabindex="0"><code>import numpy as np
 

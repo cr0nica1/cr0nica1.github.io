@@ -8,7 +8,7 @@
   <meta property="og:site_name" content="Cr0nica1">
   <meta property="og:title" content="Dreamhack CTF Season 7 Round #5 (🚩Div1)">
   <meta property="og:description" content="Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.
-Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:">
+Chat with Me - Binary exploitation I. Vulnerability">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -18,7 +18,7 @@ Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudoco
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Dreamhack CTF Season 7 Round #5 (🚩Div1)">
   <meta name="twitter:description" content="Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.
-Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:">
+Chat with Me - Binary exploitation I. Vulnerability">
 <meta name="application-name" content="Cr0nica1">
 <meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/dhctf%237r5/" /><link rel="prev" href="https://cr0nica1.github.io/posts/research/" /><link rel="next" href="https://cr0nica1.github.io/posts/dhweb/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -131,43 +131,43 @@ Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudoco
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/SJxenTYj1l.png"
-        data-srcset="https://hackmd.io/_uploads/SJxenTYj1l.png, https://hackmd.io/_uploads/SJxenTYj1l.png 1.5x, https://hackmd.io/_uploads/SJxenTYj1l.png 2x"
+        data-src="/DHCTF/i1.png"
+        data-srcset="/DHCTF/i1.png, /DHCTF/i1.png 1.5x, /DHCTF/i1.png 2x"
         data-sizes="auto"
-        alt="https://hackmd.io/_uploads/SJxenTYj1l.png"
-        title="image" /></p>
+        alt="/DHCTF/i1.png"
+        title="alt text" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/B1rb3aFi1g.png"
-        data-srcset="https://hackmd.io/_uploads/B1rb3aFi1g.png, https://hackmd.io/_uploads/B1rb3aFi1g.png 1.5x, https://hackmd.io/_uploads/B1rb3aFi1g.png 2x"
+        data-src="/DHCTF/i2.png"
+        data-srcset="/DHCTF/i2.png, /DHCTF/i2.png 1.5x, /DHCTF/i2.png 2x"
         data-sizes="auto"
-        alt="https://hackmd.io/_uploads/B1rb3aFi1g.png"
-        title="image" /></p>
+        alt="/DHCTF/i2.png"
+        title="alt text" /></p>
 <p>Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:</p>
 <pre tabindex="0"><code>_QWORD buf[97];
 memset(buf, 0, 0x300uLL);
 v12 = read(v13, buf, 0x600uLL);
 </code></pre><p>Do chương trình có NX, vì vậy hướng tiếp cận sẽ không phải là ret2shellcode.</p>
 <h3 id="ii-exploitation">II. Exploitation</h3>
-<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:
-<img
+<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:</p>
+<p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/HkcUATtiJg.png"
-        data-srcset="https://hackmd.io/_uploads/HkcUATtiJg.png, https://hackmd.io/_uploads/HkcUATtiJg.png 1.5x, https://hackmd.io/_uploads/HkcUATtiJg.png 2x"
+        data-src="/DHCTF/i3.png"
+        data-srcset="/DHCTF/i3.png, /DHCTF/i3.png 1.5x, /DHCTF/i3.png 2x"
         data-sizes="auto"
-        alt="https://hackmd.io/_uploads/HkcUATtiJg.png"
-        title="image" /></p>
-<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.
-<img
+        alt="/DHCTF/i3.png"
+        title="alt text" /></p>
+<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.</p>
+<p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/Byc3CpFo1g.png"
-        data-srcset="https://hackmd.io/_uploads/Byc3CpFo1g.png, https://hackmd.io/_uploads/Byc3CpFo1g.png 1.5x, https://hackmd.io/_uploads/Byc3CpFo1g.png 2x"
+        data-src="/DHCTF/i4.png"
+        data-srcset="/DHCTF/i4.png, /DHCTF/i4.png 1.5x, /DHCTF/i4.png 2x"
         data-sizes="auto"
-        alt="https://hackmd.io/_uploads/Byc3CpFo1g.png"
-        title="image" /></p>
+        alt="/DHCTF/i4.png"
+        title="alt text" /></p>
 <p>Có sẵn một gadget rất đẹp ở đây. Tuy nhiên ở đây thì mình sợ rằng việc overflow sẽ khiến một vài hàm đặc biệt kiểm tra tình trạng kết nối làm mất connection nên để an toàn mình stack pivot sang một vùng có quyền rw, và do cũng không có PIE nên mình dễ dàng bổ sung vào payload các gadget để stack pivot và thực hiển read một lần nữa. Mình tìm thêm gadget pop_rbp và gadget leave_ret. Payload đầu tiên để leak libc_base và yêu cầu hàm read thêm 1 lần nữa.</p>
 <pre tabindex="0"><code>payload=b&#39;A&#39;*840
 payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)

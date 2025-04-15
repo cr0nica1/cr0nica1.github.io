@@ -141,68 +141,68 @@ Do chương trình này Statically linked, cộng với các tham số truyền 
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 1.5x, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 2x"
+        data-src="/utctf/i1.png"
+        data-srcset="/utctf/i1.png, /utctf/i1.png 1.5x, /utctf/i1.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
-        title="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png" /></p>
+        alt="/utctf/i1.png"
+        title="alt text" /></p>
 <p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png, http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png 1.5x, http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png 2x"
+        data-src="/utctf/i2.png"
+        data-srcset="/utctf/i2.png, /utctf/i2.png 1.5x, /utctf/i2.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png"
-        title="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png" /></p>
-<p>Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
+        alt="/utctf/i2.png"
+        title="alt text" />
+Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
 <h3 id="2-patch-byte">2. Patch byte</h3>
 <p>Mình patch toàn bộ lệnh gọi hàm sub_401775 bằng nop.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png, http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png 1.5x, http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png 2x"
+        data-src="/utctf/i3.png"
+        data-srcset="/utctf/i3.png, /utctf/i3.png 1.5x, /utctf/i3.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png"
-        title="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png" /></p>
+        alt="/utctf/i3.png"
+        title="alt text" /></p>
 <p>Thay toàn bộ byte ở đây thành 0x90.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png, http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png 1.5x, http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png 2x"
+        data-src="/utctf/i4.png"
+        data-srcset="/utctf/i4.png, /utctf/i4.png 1.5x, /utctf/i4.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png"
-        title="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png" /></p>
+        alt="/utctf/i4.png"
+        title="alt text" /></p>
 <p>Mình cho chạy thử chương trình ở đây và nhận được flag.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png, http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png 1.5x, http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png 2x"
+        data-src="/utctf/i5.png"
+        data-srcset="/utctf/i5.png, /utctf/i5.png 1.5x, /utctf/i5.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png"
-        title="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png" /></p>
+        alt="/utctf/i5.png"
+        title="alt text" /></p>
 <h2 id="retirement-plan---binary-exploitation">RETirement plan - binary exploitation</h2>
 <h3 id="1-vulnerability">1. Vulnerability</h3>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png, http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png 1.5x, http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png 2x"
+        data-src="/utctf/i6.png"
+        data-srcset="/utctf/i6.png, /utctf/i6.png 1.5x, /utctf/i6.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png"
-        title="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png" /></p>
+        alt="/utctf/i6.png"
+        title="alt text" /></p>
 <p>Nhìn vào pseudocode, mình nhận thấy một lỗi bof ở hàm gets() và lỗi format string ở hàm printf.
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png, http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png 1.5x, http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png 2x"
+        data-src="/utctf/i7.png"
+        data-srcset="/utctf/i7.png, /utctf/i7.png 1.5x, /utctf/i7.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png"
-        title="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png" /></p>
+        alt="/utctf/i7.png"
+        title="alt text" /></p>
 <p>Checksec chương trình nhận thấy không có bất kỳ một mitigation nào, ngoại trừ Partial RELRO. Do đó chall này có rất nhiều phương án, phương án của mình trình bày ở đây là sử dụng ROP.</p>
 <h3 id="2-analysis">2. Analysis</h3>
 <p>Vòng lặp for ngay bên dưới hàm gets là một thuật toán xử lý để lọc các ký tự độc hại nhằm khai thác format string. Tuy nhiên thay vì kiểm tra string format, chương trình lại gán format vào con trỏ v5 và thực hiện rà soát string vào con trỏ v5. Không những vậy, vòng lặp sẽ chạy đến khi v5[i] có giá trị NULL. Như vậy ý tưởng của mình sẽ là ghi đè giá trị con trỏ v5 bằng 1 địa chỉ có quyền rw mà ở đấy toàn các giá trị NULL. Sau đó mình sẽ ghi đè ret_address bằng các gadget nhằm thực thi lại hàm main 1 lần nữa sau khi đã leak được địa chỉ libc trên qua format string.</p>
@@ -211,63 +211,63 @@ Do chương trình này Statically linked, cộng với các tham số truyền 
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png, http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png 1.5x, http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png 2x"
+        data-src="/utctf/i8.png"
+        data-srcset="/utctf/i8.png, /utctf/i8.png 1.5x, /utctf/i8.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png"
-        title="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png" /></p>
+        alt="/utctf/i8.png"
+        title="alt text" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png, http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png 1.5x, http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png 2x"
+        data-src="/utctf/i9.png"
+        data-srcset="/utctf/i9.png, /utctf/i9.png 1.5x, /utctf/i9.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png"
-        title="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png" /></p>
+        alt="/utctf/i9.png"
+        title="alt text" /></p>
 <p>vậy là đã có vùng nhớ ghi đè vào v5. Mình sẽ thử gửi payload xem chúng ta thu được gì.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png, http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png 1.5x, http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png 2x"
+        data-src="/utctf/i10.png"
+        data-srcset="/utctf/i10.png, /utctf/i10.png 1.5x, /utctf/i10.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png"
-        title="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png" /></p>
+        alt="/utctf/i10.png"
+        title="alt text" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png, http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png 1.5x, http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png 2x"
+        data-src="/utctf/i11.png"
+        data-srcset="/utctf/i11.png, /utctf/i11.png 1.5x, /utctf/i11.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png"
-        title="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png" /></p>
+        alt="/utctf/i11.png"
+        title="alt text" /></p>
 <p>Check giá trị thu được, chúng ta biết được rằng địa chỉ này là địa chỉ của hàm <em>IO_2_1_stdin</em> trong libc.</p>
 <p>việc còn lại khá là đơn giản, payload thứ 2 chúng ta chỉ cần ghi đè các gadget để thực thi system(/bin/sh) là xong.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png, http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png 1.5x, http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png 2x"
+        data-src="/utctf/i12.png"
+        data-srcset="/utctf/i12.png, /utctf/i12.png 1.5x, /utctf/i12.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png"
-        title="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png" /></p>
+        alt="/utctf/i12.png"
+        title="alt text" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png, http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png 1.5x, http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png 2x"
+        data-src="/utctf/i13.png"
+        data-srcset="/utctf/i13.png, /utctf/i13.png 1.5x, /utctf/i13.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png"
-        title="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png" /></p>
+        alt="/utctf/i13.png"
+        title="alt text" /></p>
 <p>Kết nối vào máy remote ta thu được flag.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png, http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png 1.5x, http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png 2x"
+        data-src="/utctf/i14.png"
+        data-srcset="/utctf/i14.png, /utctf/i14.png 1.5x, /utctf/i14.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png"
-        title="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png" /></p>
+        alt="/utctf/i14.png"
+        title="alt text" /></p>
 <h3 id="4-script">4. Script</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
 </span></span><span style="display:flex;"><span>

@@ -132,58 +132,58 @@ Intermediate Software Design - reverse engineering 1. Static Analysis Chương t
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png, http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png 1.5x, http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png 2x"
+        data-src="/squirrel/i1.png"
+        data-srcset="/squirrel/i1.png, /squirrel/i1.png 1.5x, /squirrel/i1.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png"
-        title="http://note.bksec.vn/pad/uploads/66b44fb3-d5e2-4ab1-b324-6345a6894b6a.png" /></p>
+        alt="/squirrel/i1.png"
+        title="alt text" /></p>
 <p>Có một lưu ý nhỏ ở đây, chương trình đọc input thành một mảng các ký tự, mỗi ký tự là 4 byte. Ở vòng lặp đầu tiên, con trỏ v3 di chuyển dọc theo mảng ký tự input, rồi lấy kết quả thực hiện xor với kết quả trong &amp;v23.Tuy nhiên, con trỏ v3 lại là con trỏ (_DWORD), mà mảng ký tự đọc vào là các mảng ký tự 4 byte nên phép xor này chỉ ảnh hưởng đến các ký tự lẻ. Chúng ta có thể thấy rõ như sau.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png, http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png 1.5x, http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png 2x"
+        data-src="/squirrel/i2.png"
+        data-srcset="/squirrel/i2.png, /squirrel/i2.png 1.5x, /squirrel/i2.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png"
-        title="http://note.bksec.vn/pad/uploads/46c7f311-3360-4fbd-a8de-8620680e2fda.png" /></p>
+        alt="/squirrel/i2.png"
+        title="alt text" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png, http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png 1.5x, http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png 2x"
+        data-src="/squirrel/i3.png"
+        data-srcset="/squirrel/i3.png, /squirrel/i3.png 1.5x, /squirrel/i3.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png"
-        title="http://note.bksec.vn/pad/uploads/9891d81b-3a03-4eb9-81c9-765ca589c861.png" /></p>
+        alt="/squirrel/i3.png"
+        title="alt text" /></p>
 <p>Như vậy sau loop thứ nhất sẽ thực hiện phép xor giữa các phần tử lẻ của chuỗi và constant tại &amp;v23.</p>
 <p>Ở vòng lặp thứ 2, chương trình lặp qua string sau khi bị biến đổi và thực hiện phép toán vs các constant được lưu sẵn.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png, http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png 1.5x, http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png 2x"
+        data-src="/squirrel/i4.png"
+        data-srcset="/squirrel/i4.png, /squirrel/i4.png 1.5x, /squirrel/i4.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png"
-        title="http://note.bksec.vn/pad/uploads/8e949635-76dd-4756-b763-6504775f5b85.png" /></p>
+        alt="/squirrel/i4.png"
+        title="alt text" /></p>
 <p>Có một điều đáng lưu ý là v13 là bộ đếm để lấy giá trị tại v21, tuy nhiên v13 cũng chính là bộ đếm ở vòng lặp trên và nó không hề đặt lại về 0 khi vào vòng lặp này nên v13 sẽ bắt đầu từ số phần tử lẻ của input.</p>
 <p>Từ phân tích trên, ta chỉ cần lấy constant cần thiết vào và viết script reverse lại là xong.</p>
 <h3 id="2-reversing">2. Reversing</h3>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png, http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png 1.5x, http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png 2x"
+        data-src="/squirrel/i5.png"
+        data-srcset="/squirrel/i5.png, /squirrel/i5.png 1.5x, /squirrel/i5.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png"
-        title="http://note.bksec.vn/pad/uploads/c3ab91dc-5e79-4d62-81db-177bf96fe261.png" /></p>
+        alt="/squirrel/i5.png"
+        title="alt text" /></p>
 <p>Output chứa ký tự không in được nên mình sẽ lấy giá trị hex ở đây. Đồng thời dễ nhận thấy output có độ dài là 26 nên v13 sẽ bắt đầu từ vị trí 13 ở vòng lặp thứ 2. Mình chạy script reverse và thu được.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png"
-        data-srcset="http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png, http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png 1.5x, http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png 2x"
+        data-src="/squirrel/i6.png"
+        data-srcset="/squirrel/i6.png, /squirrel/i6.png 1.5x, /squirrel/i6.png 2x"
         data-sizes="auto"
-        alt="http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png"
-        title="http://note.bksec.vn/pad/uploads/dd71f5a7-8283-4a51-b955-05ea9bee000c.png" /></p>
+        alt="/squirrel/i6.png"
+        title="alt text" /></p>
 <h3 id="3-script">3. Script</h3>
 <pre tabindex="0"><code>v21=[3, 3, 1, 5, 50, 8, 1, 9,
  5, 7, 9, 3, 2, 2, 6, 8,
