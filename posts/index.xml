@@ -309,10 +309,10 @@ print(m)
         if not changed:
             broken = True
             break
-</code></pre><p>Sử dụng đoạn mã này vào script thu được.
-</p>
-<p>Nhập vào và lấy flag.
-</p>
+</code></pre><p>Sử dụng đoạn mã này vào script thu được.</p>
+<p></p>
+<p>Nhập vào và lấy flag.</p>
+<p></p>
 <h3 id="3-script">3. Script</h3>
 <pre tabindex="0"><code>def reverse_execute(code, fin_output):
     values = code.split(&#34; &#34;)
