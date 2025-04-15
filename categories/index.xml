@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Cr0nica1</title>
+    <link>https://cr0nica1.github.io/categories/</link>
+    <description>Recent content in Categories on Cr0nica1</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <managingEditor>minhtoanlamson2005@gmail.com (cr0nica1)</managingEditor>
+    <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster>
+    <atom:link href="https://cr0nica1.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
