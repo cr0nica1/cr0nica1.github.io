@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>K!nd4SUS CTF 2025 - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/intro/">
+  <meta property="og:site_name" content="Cr0nica1">
+  <meta property="og:title" content="K!nd4SUS CTF 2025">
+  <meta property="og:description" content="Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.
+I. The kindling of the first Flag - reverse engineering 1. Analysis Chall là một file python về một trò chơi tìm path thỏa mãn để chương trình in ra flag.
+import hashlib from Crypto.Cipher import AES from Crypto.Util.Padding import pad, unpad import os import base64 import random FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM&#43;x7vRw2qOr3ORbw==&#34; RED = &#34;\033[0;31m&#34; PURPLE = &#34;\033[0;35m&#34; ITALIC = &#34;\033[3m&#34; BOLD = &#34;\033[1m&#34; UNDERLINE = &#34;\033[4m&#34; END = &#34;\033[0m&#34; # don&#39;t mind the crypto stuff class Cipher: def encrypt(self, plainText, key): iv = os.urandom(16) privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() cipher = AES.new(privateKey, AES.MODE_CBC, iv) encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size)) return base64.b64encode(iv &#43; encryptedBytes).decode() def decrypt(self, encrypted, key): encryptedData = base64.b64decode(encrypted) iv = encryptedData[:16] privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() cipher = AES.new(privateKey, AES.MODE_CBC, iv) try: decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size) except: die(1) return decryptedBytes.decode() places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;] routes = [ [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;], [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;], [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;], [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;], [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;], [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;], [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;], [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;], [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;], [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;], [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;], [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;], [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;], [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;], [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;] ] position = &#34;&#34; path = [] def checkFlag(): global path aes = Cipher() a = &#34;&#34; b = &#34;&#34; for p in path: if path.index(p) % 2 == 0: a &#43;= f&#34;{p[0]&#43;p[-1]}&#34; else: b &#43;= f&#34;{p[0]&#43;p[-1]}&#34; key = a&#43;b attempt = aes.decrypt(FLAG,key) if &#34;KSUS&#34; not in attempt: die(1) else: print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;) print(f&#34;{PURPLE}{attempt}{END}&#34;) exit() def printLocationDetails(): global position print(f&#34;\nYou find yourself in a place called {PURPLE}{BOLD}{position.upper()}{END}.&#34;) print(&#34;A number of dangerous paths, crawling with enemies, open in front of you... An infinite sea of possibilities.\nWhere will you go?\n&#34;) for i,r in enumerate(routes[places.index(position)][1:]): print(f&#34;\t{i}. {r}&#34;) def die(way): quotes = [ f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;, f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;, f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;, f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34; ] if way: print(f&#34;\n{random.choice(quotes)}&#34;) else: print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;) print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;) exit() def proceed(next): global position if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]&#43;1]) == 1: if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1): die(1) elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0: if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))): die(1) elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;: if next &gt; (True &lt;&lt; True): die(1) elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: if next &gt; (sum(map(int,str(111111)[::2]))): die(1) path.append(routes[places.index(position)][next]) position = routes[places.index(position)][next] def play(): global position global path while True: if position != &#34;Kiln of the First Flame&#34; and len(path) &lt; 22: printLocationDetails() next = int(input(&#34;\nChoose a number &gt; &#34;)) if next &lt; 0 or next &gt; 3: exit() proceed(next&#43;1) elif position == &#34;Kiln of the First Flame&#34;: checkFlag() elif len(path) &gt;= 22: die(0) def main(): global position print(f&#34;\n{ITALIC}You slowly rise as you are awaken by a sweet and ageless voice. \n&#39;Let the Flame guide thee in this search for the flag&#39;, she whispers softly into your ear. \nBefore you can ask any questions, she disappears. \n\nYou are now left in utter silence.{END}\n&#34;) print(f&#34;\t{UNDERLINE}PRESS ENTER TO CONTINUE{END}&#34;) input() position = &#34;Cemetery of Ash&#34; path.append(position) play() if __name__ == &#34;__main__&#34;: main() Khi đạt điều kiện kết thúc của path ( đến vị trí Kiln of the First Flame hoặc độ dài path lớn hơn 22) thì chương trình sẽ gọi check flag. Ở đây chương trình sinh string bằng 1 thuật toán xử lý từ list path, sau đó đưa kết quả thu được mã hóa bằng hàm băm sha256, rồi lấy nó làm key để giải mã Flag. Hàm băm sha256 là không thể đảo ngược ( hoặc có thể theo một vài pháp sư Trung hoa tuyên bố :v ) do vậy phương án mình nghĩ ra là brute force, do số đường đi vẫn đủ nhỏ chấp nhận được.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-16T02:31:48+07:00">
+    <meta property="article:modified_time" content="2025-04-16T02:31:48+07:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="K!nd4SUS CTF 2025">
+  <meta name="twitter:description" content="Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.
+I. The kindling of the first Flag - reverse engineering 1. Analysis Chall là một file python về một trò chơi tìm path thỏa mãn để chương trình in ra flag.
+import hashlib from Crypto.Cipher import AES from Crypto.Util.Padding import pad, unpad import os import base64 import random FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM&#43;x7vRw2qOr3ORbw==&#34; RED = &#34;\033[0;31m&#34; PURPLE = &#34;\033[0;35m&#34; ITALIC = &#34;\033[3m&#34; BOLD = &#34;\033[1m&#34; UNDERLINE = &#34;\033[4m&#34; END = &#34;\033[0m&#34; # don&#39;t mind the crypto stuff class Cipher: def encrypt(self, plainText, key): iv = os.urandom(16) privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() cipher = AES.new(privateKey, AES.MODE_CBC, iv) encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size)) return base64.b64encode(iv &#43; encryptedBytes).decode() def decrypt(self, encrypted, key): encryptedData = base64.b64decode(encrypted) iv = encryptedData[:16] privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() cipher = AES.new(privateKey, AES.MODE_CBC, iv) try: decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size) except: die(1) return decryptedBytes.decode() places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;] routes = [ [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;], [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;], [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;], [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;], [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;], [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;], [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;], [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;], [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;], [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;], [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;], [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;], [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;], [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;], [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;] ] position = &#34;&#34; path = [] def checkFlag(): global path aes = Cipher() a = &#34;&#34; b = &#34;&#34; for p in path: if path.index(p) % 2 == 0: a &#43;= f&#34;{p[0]&#43;p[-1]}&#34; else: b &#43;= f&#34;{p[0]&#43;p[-1]}&#34; key = a&#43;b attempt = aes.decrypt(FLAG,key) if &#34;KSUS&#34; not in attempt: die(1) else: print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;) print(f&#34;{PURPLE}{attempt}{END}&#34;) exit() def printLocationDetails(): global position print(f&#34;\nYou find yourself in a place called {PURPLE}{BOLD}{position.upper()}{END}.&#34;) print(&#34;A number of dangerous paths, crawling with enemies, open in front of you... An infinite sea of possibilities.\nWhere will you go?\n&#34;) for i,r in enumerate(routes[places.index(position)][1:]): print(f&#34;\t{i}. {r}&#34;) def die(way): quotes = [ f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;, f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;, f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;, f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34; ] if way: print(f&#34;\n{random.choice(quotes)}&#34;) else: print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;) print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;) exit() def proceed(next): global position if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]&#43;1]) == 1: if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1): die(1) elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0: if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))): die(1) elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;: if next &gt; (True &lt;&lt; True): die(1) elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: if next &gt; (sum(map(int,str(111111)[::2]))): die(1) path.append(routes[places.index(position)][next]) position = routes[places.index(position)][next] def play(): global position global path while True: if position != &#34;Kiln of the First Flame&#34; and len(path) &lt; 22: printLocationDetails() next = int(input(&#34;\nChoose a number &gt; &#34;)) if next &lt; 0 or next &gt; 3: exit() proceed(next&#43;1) elif position == &#34;Kiln of the First Flame&#34;: checkFlag() elif len(path) &gt;= 22: die(0) def main(): global position print(f&#34;\n{ITALIC}You slowly rise as you are awaken by a sweet and ageless voice. \n&#39;Let the Flame guide thee in this search for the flag&#39;, she whispers softly into your ear. \nBefore you can ask any questions, she disappears. \n\nYou are now left in utter silence.{END}\n&#34;) print(f&#34;\t{UNDERLINE}PRESS ENTER TO CONTINUE{END}&#34;) input() position = &#34;Cemetery of Ash&#34; path.append(position) play() if __name__ == &#34;__main__&#34;: main() Khi đạt điều kiện kết thúc của path ( đến vị trí Kiln of the First Flame hoặc độ dài path lớn hơn 22) thì chương trình sẽ gọi check flag. Ở đây chương trình sinh string bằng 1 thuật toán xử lý từ list path, sau đó đưa kết quả thu được mã hóa bằng hàm băm sha256, rồi lấy nó làm key để giải mã Flag. Hàm băm sha256 là không thể đảo ngược ( hoặc có thể theo một vài pháp sư Trung hoa tuyên bố :v ) do vậy phương án mình nghĩ ra là brute force, do số đường đi vẫn đủ nhỏ chấp nhận được.">
+<meta name="application-name" content="Cr0nica1">
+<meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/intro/" /><link rel="next" href="https://cr0nica1.github.io/posts/utctf/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "K!nd4SUS CTF 2025",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/cr0nica1.github.io\/posts\/intro\/"
+        },"genre": "posts","wordcount":  3324 ,
+        "url": "https:\/\/cr0nica1.github.io\/posts\/intro\/","datePublished": "2025-04-16T02:31:48+07:00","dateModified": "2025-04-16T02:31:48+07:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "cr0nica1"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('dark' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'dark' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Cr0nica1"><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="search..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Cr0nica1"><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="search..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">K!nd4SUS CTF 2025</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-04-16">2025-04-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;3324 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;16 minutes&nbsp;<span id="/posts/intro/" class="leancloud_visitors" data-flag-title="K!nd4SUS CTF 2025">
+                        <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#i-the-kindling-of-the-first-flag---reverse-engineering">I. The kindling of the first Flag - reverse engineering</a>
+      <ul>
+        <li><a href="#1-analysis">1. Analysis</a></li>
+        <li><a href="#2-analyzing-constraints">2. Analyzing constraints</a></li>
+        <li><a href="#3-brute-force">3. Brute force</a></li>
+      </ul>
+    </li>
+    <li><a href="#ii-turing-approved---reverse-engineering">II Turing-Approved - reverse engineering</a>
+      <ul>
+        <li><a href="#1-static-analysis">1. Static Analysis</a></li>
+        <li><a href="#2-dynamic-analysis">2. Dynamic Analysis</a></li>
+        <li><a href="#3-script">3. Script</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.</p>
+<h2 id="i-the-kindling-of-the-first-flag---reverse-engineering">I. The kindling of the first Flag - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Chall là một file python về một trò chơi tìm path thỏa mãn để chương trình in ra flag.</p>
+<pre tabindex="0"><code>import hashlib
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import base64
+import random
+
+FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM+x7vRw2qOr3ORbw==&#34;
+RED = &#34;\033[0;31m&#34;
+PURPLE = &#34;\033[0;35m&#34;
+ITALIC = &#34;\033[3m&#34;
+BOLD = &#34;\033[1m&#34;
+UNDERLINE = &#34;\033[4m&#34;
+END = &#34;\033[0m&#34;
+
+# don&#39;t mind the crypto stuff
+class Cipher:
+    def encrypt(self, plainText, key):
+        iv = os.urandom(16) 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() 
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv)
+        encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size))  
+        return base64.b64encode(iv + encryptedBytes).decode()
+
+    def decrypt(self, encrypted, key):
+        encryptedData = base64.b64decode(encrypted) 
+        iv = encryptedData[:16] 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest()  
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv) 
+        try:
+            decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size)  
+        except:
+            die(1)
+        return decryptedBytes.decode()
+
+
+places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;]
+
+routes = [
+    [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;],
+    [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;],
+    [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;],
+    [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;],
+    [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;],
+    [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;],
+    [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;],
+    [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;],
+    [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;],
+    [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;],
+    [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;],
+    [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;],
+    [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;],
+    [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;],
+    [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;]
+]
+
+position = &#34;&#34;
+path = []
+
+def checkFlag():
+    global path
+    aes = Cipher()
+
+    a = &#34;&#34; 
+    b = &#34;&#34;
+    for p in path:
+        if path.index(p) % 2 == 0:
+            a += f&#34;{p[0]+p[-1]}&#34;
+        else:
+            b += f&#34;{p[0]+p[-1]}&#34;
+
+    key = a+b
+    attempt = aes.decrypt(FLAG,key)
+
+    if &#34;KSUS&#34; not in attempt:
+        die(1)
+    else:
+        print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;)
+        print(f&#34;{PURPLE}{attempt}{END}&#34;)
+        exit()
+
+
+def printLocationDetails():
+    global position
+    print(f&#34;\nYou find yourself in a place called {PURPLE}{BOLD}{position.upper()}{END}.&#34;)
+    print(&#34;A number of dangerous paths, crawling with enemies, open in front of you... An infinite sea of possibilities.\nWhere will you go?\n&#34;)
+    for i,r in enumerate(routes[places.index(position)][1:]):
+        print(f&#34;\t{i}. {r}&#34;)
+
+
+def die(way):
+    quotes = [
+        f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;,
+        f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;,
+        f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;,
+        f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34;
+    ]
+    if way:
+        print(f&#34;\n{random.choice(quotes)}&#34;)
+    else:
+        print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;)
+
+    print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;)
+    exit()
+
+
+def proceed(next):
+    global position
+    if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+        if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+    elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0:   
+        if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))):
+            die(1)
+    elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;:  
+        if next &gt; (True &lt;&lt; True):
+            die(1)
+    elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: 
+        if next &gt; (sum(map(int,str(111111)[::2]))):
+            die(1)
+
+    path.append(routes[places.index(position)][next])   
+    position = routes[places.index(position)][next]
+        
+
+def play():
+    global position
+    global path
+    while True:
+        if position != &#34;Kiln of the First Flame&#34; and len(path) &lt; 22: 
+            printLocationDetails() 
+            next = int(input(&#34;\nChoose a number &gt;   &#34;))
+            if next &lt; 0 or next &gt; 3:
+                exit()
+            proceed(next+1)
+        elif position == &#34;Kiln of the First Flame&#34;:   
+            checkFlag()
+        elif len(path) &gt;= 22:
+            die(0)
+
+
+def main():
+    global position
+    print(f&#34;\n{ITALIC}You slowly rise as you are awaken by a sweet and ageless voice. \n&#39;Let the Flame guide thee in this search for the flag&#39;, she whispers softly into your ear. \nBefore you can ask any questions, she disappears. \n\nYou are now left in utter silence.{END}\n&#34;)
+    print(f&#34;\t{UNDERLINE}PRESS ENTER TO CONTINUE{END}&#34;)
+    input()
+    position = &#34;Cemetery of Ash&#34;
+    path.append(position)  
+    play()
+
+
+if __name__ == &#34;__main__&#34;:
+    main()
+    
+</code></pre><p>Khi đạt điều kiện kết thúc của path ( đến vị trí Kiln of the First Flame hoặc độ dài path lớn hơn 22) thì chương trình sẽ gọi check flag. Ở đây chương trình sinh string bằng 1 thuật toán xử lý từ list path, sau đó đưa kết quả thu được mã hóa bằng hàm băm sha256, rồi lấy nó làm key để giải mã Flag. Hàm băm sha256 là không thể đảo ngược ( hoặc có thể theo một vài pháp sư Trung hoa tuyên bố :v ) do vậy phương án mình nghĩ ra là brute force, do số đường đi vẫn đủ nhỏ chấp nhận được.</p>
+<h3 id="2-analyzing-constraints">2. Analyzing constraints</h3>
+<p>Các ràng buộc đối với path để path hợp lệ nằm bên trong hàm proceed, được obfuscated để khó nhận ra hơn.</p>
+<pre tabindex="0"><code>if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+    if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0:   
+    if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))):
+            die(1)
+elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;:  
+    if next &gt; (True &lt;&lt; True):
+            die(1)
+elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: 
+    if next &gt; (sum(map(int,str(111111)[::2]))):
+            die(1)
+</code></pre><p>Đi vào phân tích từng ràng buộc một, mình sẽ viết lại các ràng buộc để dễ nhìn hơn. Mình sẽ đặt key = routes[places.index(position)][0].</p>
+<pre tabindex="0"><code>if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+        if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+</code></pre><p>Ở ràng buộc đầu tiên, nó sẽ tương đương với:</p>
+<pre tabindex="0"><code>if key == 3:
+        Max_choice=4
+</code></pre><p>Điều đó có nghĩa là người chơi sẽ được chọn bước tiếp theo là [0,1,2,3]. Tương tự với 3 ràng buộc còn lại.</p>
+<pre tabindex="0"><code>elif sum(int(d) for d in str(abs(key))) % 3 == 0:
+        Max_choice=1
+        
+elif str(abs(key))[-1] in &#34;05&#34;:
+        Max_choice=2
+elif:
+        even_sum = sum(int(d) for d in str(abs(key))[::2])
+        odd_sum = sum(int(d) for d in str(abs(key))[1::2])
+        if (even_sum - odd_sum) % 11 == 0:
+            Max_choce=3
+
+Max_choice =0
+</code></pre><h3 id="3-brute-force">3. Brute force</h3>
+<pre tabindex="0"><code>import hashlib
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import base64
+import random
+from collections import deque
+FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM+x7vRw2qOr3ORbw==&#34;
+RED = &#34;\033[0;31m&#34;
+PURPLE = &#34;\033[0;35m&#34;
+ITALIC = &#34;\033[3m&#34;
+BOLD = &#34;\033[1m&#34;
+UNDERLINE = &#34;\033[4m&#34;
+END = &#34;\033[0m&#34;
+
+
+class Cipher:
+    def encrypt(self, plainText, key):
+        iv = os.urandom(16) 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() 
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv)
+        encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size))  
+        return base64.b64encode(iv + encryptedBytes).decode()
+
+    def decrypt(self, encrypted, key):
+        encryptedData = base64.b64decode(encrypted) 
+        iv = encryptedData[:16] 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest()  
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv) 
+        try:
+            decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size)  
+        except:
+            return &#39;&#39;
+        return decryptedBytes.decode()
+
+
+places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;]
+
+routes = [
+    [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;],
+    [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;],
+    [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;],
+    [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;],
+    [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;],
+    [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;],
+    [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;],
+    [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;],
+    [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;],
+    [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;],
+    [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;],
+    [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;],
+    [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;],
+    [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;],
+    [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;]
+]
+path=[]
+check=True
+
+def checkFlag(path):
+    aes = Cipher()
+
+    a = &#34;&#34; 
+    b = &#34;&#34;
+    for p in path:
+        if path.index(p) % 2 == 0:
+            a += f&#34;{p[0]+p[-1]}&#34;
+        else:
+            b += f&#34;{p[0]+p[-1]}&#34;
+
+    key = a + b
+    #print(f&#34;Testing path: {&#39; -&gt; &#39;.join(path)}&#34;) 
+    #print(f&#34;Generated key: {key}&#34;) 
+
+    try:
+        attempt = aes.decrypt(FLAG, key)
+        if attempt and &#34;KSUS&#34; in attempt:
+            print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;)
+            print(f&#34;{PURPLE}{attempt}{END}&#34;)
+            return True  
+    except Exception as e:
+        pass
+    
+    return False  
+
+def die(way):
+    quotes = [
+        f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;,
+        f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;,
+        f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;,
+        f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34;
+    ]
+    if way:
+        print(f&#34;\n{random.choice(quotes)}&#34;)
+    else:
+        print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;)
+
+    print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;)
+    global check 
+    check=False
+
+def get_max_choice(key):
+    
+    if key == 3:
+        return 4
+    elif sum(int(d) for d in str(abs(key))) % 3 == 0:
+        return 1
+    elif str(abs(key))[-1] in &#34;05&#34;:
+        return 2
+    else:
+        even_sum = sum(int(d) for d in str(abs(key))[::2])
+        odd_sum = sum(int(d) for d in str(abs(key))[1::2])
+        if (even_sum - odd_sum) % 11 == 0:
+            return 3
+    return 0  
+
+
+def generate_paths(current, path, paths):
+    
+  
+    if current == &#34;Kiln of the First Flame&#34;:
+        paths.append(path)
+        return
+
+    if len(path) &gt;= 22:
+        return
+
+    try:
+        idx = places.index(current)
+    except ValueError:
+        return
+    route = routes[idx]
+    key = route[0]
+    max_choice = get_max_choice(key)
+
+ 
+    for i in range(max_choice):
+        next_place = route[i + 1]
+        generate_paths(next_place, path + [next_place], paths)
+
+
+
+all_paths = []
+generate_paths(&#34;Cemetery of Ash&#34;, [&#34;Cemetery of Ash&#34;], all_paths)
+for path in all_paths:
+    if checkFlag(path)==True:
+        exit()
+</code></pre><p>Mình sẽ sinh tất cả các path hợp lệ dựa vào 4 constraint rồi brute force tìm flag.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/image.png"
+        data-srcset="/images/image.png, /images/image.png 1.5x, /images/image.png 2x"
+        data-sizes="auto"
+        alt="/images/image.png"
+        title="alt text" /></p>
+<h2 id="ii-turing-approved---reverse-engineering">II Turing-Approved - reverse engineering</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p>Giải nén Challenge thì gồm có 4 file là execution.sty, interpreted.tex, Makefile và RAM. Đầu tiên mình kiểm tra file Makefile.</p>
+<pre tabindex="0"><code>.PHONY: run
+
+run:
+   echo &#34;&#34; &gt; DUMP
+   pdflatex --shell-escape interpreted.tex &gt; /dev/null
+   tr -d &#39;\n&#39; &lt; DUMP
+   rm interpreted.aux interpreted.log interpreted.output
+</code></pre><p>Khá kỳ lạ ở đây là pdflatex lại khởi chạy với option &ndash;shell-escape, dùng để thực thi các lệnh shell trong file latex.
+Mình sẽ kiểm tra bên trong file latex, tức file interpreted.tex xem nó thực thi cái gì.</p>
+<pre tabindex="0"><code>\documentclass{article}
+\usepackage[a0paper,landscape]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%																%
+%		Hi, enjoy the folly		~ S-Mancl						%
+%																%
+%																%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage{execution}
+\begin{document}
+
+\pagenumbering{gobble}
+
+\begin{titlepage}
+    \pagestyle{empty}
+	\begin{center}
+		\scalebox{8}{
+		{\LARGE Emulation of a CPU using \LaTeX}
+		}
+		
+		\scalebox{8}{
+		{\Large It&#39;s funny, isn&#39;t it?}
+		}
+	\end{center}
+\end{titlepage}
+
+\setup
+\fetchdecodeexecwriteback
+\printCPU
+
+\end{document}
+</code></pre><p>Ở đây thì mình nhìn thấy title của file pdf được xuất ra là &ldquo;Emulation of a CPU using \LaTeX&rdquo;, làm mình suy nghĩ đến ý tưởng có thể các câu lệnh được thực thi ở đây là một chương trình mô phỏng CPU.</p>
+<p>Sau khi đặt xong title, chương trình chạy 3 lệnh là <code>\setup</code>, <code>\fetchdecodeexecwriteback</code>, và <code>printCPU</code>. Ở bên dưới không có định nghĩa các lệnh này nên có lẽ nó được định nghĩa trong 1 file khác.  Sau một thời gian research thì mình biết rằng file <code>.sty</code> là file có thể dùng để định nghĩa lệnh trong latex, vì vậy mình sẽ đọc file <code>execution.sty</code> xem nó định nghĩa 3 lệnh này như thế nào.
+Mình mở file này ra thì thực sự nó rất &hellip; dài, mình không thể đọc toàn bộ nên chỉ search các từ khóa <code>\setup</code>, <code>\fetchdecodeexecwriteback</code>, và <code>\printCPU</code> xem các lệnh này làm gì,</p>
+<p><code>\setup</code> :</p>
+<pre tabindex="0"><code>\newcommand{\setup}{%
+    \newwrite\myoutput
+    \immediate\openout\myoutput=\jobname.output
+    \lgl{Setting up everything, please be patient}
+
+        \newcounter{lineNumber}
+        \newcounter{countLetters}
+    \setcounter{countLetters}{0}
+        \newcounter{exit}
+        \newcounter{start}
+    \newcounter{end}
+    \newcounter{temp}
+    \newcounter{temp1}
+    \newcounter{temp2}
+    \newcounter{temp3}
+    \newcounter{temp4}
+    \newcounter{temp_}
+    \newcounter{temp_1}
+    \newcounter{temp_2}
+    \foreach \i in {0,...,15}{
+        \newcounter{tempregister_\i}
+        \setcounter{tempregister_\i}{0}
+    }
+    \foreach \i in {0,...,15}{
+        \newcounter{tempregister1_\i}
+        \setcounter{tempregister1_\i}{0}
+    }
+        \newcounter{PC}%
+        \foreach \j in {0,...,511}{
+        \foreach \i in {0,...,15}{
+            \newcounter{mem\j_\i}
+            \setcounter{mem\j_\i}{0}
+        }
+    }
+        \foreach \i in {0,...,7}{
+        \foreach \j in {0,...,15}{
+            \newcounter{R\i\j}
+            \setcounter{R\i\j}{0}
+        }
+    }
+    \foreach \i in {IR,MAR,MDR,PC}{
+        \foreach \j in {0,...,15}{
+            \newcounter{\i\j}
+            \setcounter{\i\j}{0}
+        }
+    }
+    \foreach \i in {0,...,2}{
+        \newcounter{CC\i}
+        \setcounter{CC\i}{0}
+    }
+    
+    \setcounter{CC1}{1}
+    
+    \lr
+}
+
+\newcommand{\lr}{%
+    \setcounter{temp}{0}
+    \setcounter{temp1}{0}
+    \CatchFileDef{\ramdata}{RAM}{}
+    \lgl{Ready to read memory}
+    \foreach \bit in \ramdata {
+        \ifnum\value{temp1}&gt;15
+            \stepcounter{temp}
+            \setcounter{temp1}{0}
+        \fi
+        \ifnum \bit=1
+            \setcounter{mem\arabic{temp}_\arabic{temp1}}{1}
+        \fi
+        \stepcounter{temp1}
+    }
+    \lgl{RAM loaded into emulated memory}
+}
+</code></pre><p><code>\fetchdecodeexecwriteback</code> :</p>
+<pre tabindex="0"><code>\newcommand{\fetchdecodeexecwriteback}{%
+        \setcounter{exit}{0}
+    \loop
+    \ti{PC}%
+        \printCPU%
+%
+%
+    \foreach \i in {0,...,15}{%
+        \setcounter{IR\i}{\value{mem\arabic{PC}_\i}}%
+    }%
+    \immediate\write18{printf &#34;\\a&#34; 1&gt;&amp;2;}
+%
+    \ifnum \value{IR0}=0{
+        \ifnum \value{IR1}=0{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \nxti
+                    \lits{BR}
+                    \pb
+                }\else{
+                    \lits{ADD}
+                    \pa
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LD}
+                    \pl
+                    \nxti
+                }\else{
+                    \lits{ST}
+                    \ps
+                    \nxti
+                }\fi
+            }\fi
+        }\else{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{JSR}
+                    \pjts
+                }\else{
+                    \lits{AND}
+                    \pan
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LDR}
+                    \plr
+                    \nxti
+                }\else{
+                    \lits{STR}
+                    \psr
+                    \nxti
+                }\fi
+            }\fi
+        }\fi
+    }\else{
+        \ifnum \value{IR1}=0{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{RTI}
+                    \prfi
+                }\else{
+                    \lits{NOT}
+                    \pn
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LDI}
+                    \pli
+                    \nxti
+                }\else{
+                    \lits{STI}
+                    \psit
+                    \nxti
+                }\fi
+            }\fi
+        }\else{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{JSSR}
+                    \pjtsur
+                }\else{
+                    \lits{RET}
+                    \pr
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LEA}
+                    \plea
+                    \nxti
+                }\else{
+                    \lits{TRAP}
+                    \pt
+                }\fi
+            }\fi
+        }\fi
+    }\fi
+
+        
+    \ifnum \value{exit}=0
+    \repeat
+
+    \lgl{Execution has ended}
+    \setcounter{temp}{0}
+    \setcounter{temp1}{0}
+    \lgl{Ready to dump memory}
+    
+
+    \foreach \j in {0,...,511}{
+        \foreach \i in {0,...,15}{
+            \ifnum \value{mem\j_\i}=1%
+                \immediate\write18{echo 1 &gt;&gt; DUMP}
+            \else
+                \immediate\write18{echo 0 &gt;&gt; DUMP}
+            \fi
+        }
+    }
+    \lgl{RAM DUMPED SUCCESSFULLY}
+    \immediate\closeout\myoutput
+}%
+</code></pre><p><code>\printCPU</code> :</p>
+<pre tabindex="0"><code>\newcommand{\printCPU}{
+    \td{R0}
+    \prr{R0}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R1}
+    \prr{R1}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R2}
+    \prr{R2}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R3}
+    \prr{R3}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R4}
+    \prr{R4}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R5}
+    \prr{R5}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R6}
+    \prr{R6}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R7}
+    \prr{R7}{\arabic{temp}}{0x\hexa{temp}}
+    \tdu{PC}
+    \prr{PC}{\arabic{temp}}{0x\hexa{temp}}
+    \tdu{IR}
+    \prr{IR}{\arabic{temp}}{0x\hexa{temp}}
+    \ifnum \value{CC0}=1%
+    \prr{CC}{(N)}{0x4}%
+    \else{%
+    \ifnum \value{CC1}=1%
+    \prr{CC}{(Z)}{0x2}%
+    \else%
+    \prr{CC}{(P)}{0x1}%
+    \fi%
+    }%
+    \fi%
+}
+</code></pre><p>Lệnh <code>\setup</code> tạo ra nhiều bộ đếm khác nhau, sau đó điền một số bộ đếm bằng <code>\lr</code>. Trong mô tả của lệnh này thì nó ghi <code>RAM loaded into emulated memory</code>. Load file RAM vào bộ nhớ giả lập ?</p>
+<p>Lệnh <code>\fetchdecodeexecwriteback</code> load các số nhị phân vào các &lsquo;IR&rsquo; từ &lsquo;bộ nhớ&rsquo;. Nếu như giả lập CPU như nó mô tả thì IR liệu có phải &lsquo;Instruction Register&rsquo; ? Tiếp đó lệnh này kiểm tra từng giá trị bit xác định các Opcode ( mình đoán dựa vào các giá trị ADD, LDI, RET,&hellip; Cộng với việc nó mô tả nó là CPU giả lập, đây có vẻ như là các câu lệnh trong Kiến trúc tập lệnh (ISA) của CPU được giả lập).</p>
+<p>Lệnh <code>\printCPU</code> in các thông tin của các thanh ghi.</p>
+<p>Oke vậy là chúng ta đã phân tích cơ bản về mã nguồn, mình sẽ thử chạy nó xem sao.</p>
+<h3 id="2-dynamic-analysis">2. Dynamic Analysis</h3>
+<p>Dùng lệnh <code>make run</code> để chạy các lệnh bên trong Makefile.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png, http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png 1.5x, http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png"
+        title="http://note.bksec.vn/pad/uploads/29a1d450-b359-4dfa-93fb-8dc6fef658af.png" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png, http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png 1.5x, http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png"
+        title="http://note.bksec.vn/pad/uploads/d41d9699-73cf-48ec-8d28-6f814ba6d733.png" /></p>
+<p>Tóm gọn lại output như sau</p>
+<pre tabindex="0"><code>echo &#34;&#34; &gt; DUMP
+pdflatex --shell-escape interpreted.tex &gt; /dev/null
+
+LC-2&gt;   Setting up everything, please be patient...
+
+LC-2&gt;   Ready to read memory...
+
+LC-2&gt;   RAM loaded into emulated memory...
+[ Các bảng mô tả dữ liệu trong Register ]
+LC-2&gt;   Found a TRAP...
+
+LC-2&gt;   Execution has ended...
+
+LC-2&gt;   Ready to dump memory...
+
+LC-2&gt;   RAM DUMPED SUCCESSFULLY...
+
+.-------.-------.-------.
+|R0     |3772   |0xEBC  |
+.-------.-------.-------.
+|R1     |3      |0x3    |
+.-------.-------.-------.
+|R2     |3769   |0xEB9  |
+.-------.-------.-------.
+|R3     |0      |0x0    |
+.-------.-------.-------.
+|R4     |0      |0x0    |
+.-------.-------.-------.
+|R5     |0      |0x0    |
+.-------.-------.-------.
+|R6     |0      |0x0    |
+.-------.-------.-------.
+|R7     |0      |0x0    |
+.-------.-------.-------.
+|PC     |278    |0x116  |
+.-------.-------.-------.
+|IR     |61477  |0xF025 |
+.-------.-------.-------.
+|CC     |(P)    |0x1    |
+tr -d &#39;\n&#39; &lt; DUMP
+[ Một dãy các giá trị nhị phân mà với dòng &#39;RAM DUMPED SUCCESSFULLY&#39;, có thể đoán là RAM sau khi thực thi]
+</code></pre><p>Shell của CPU giả lập ghi là LC-2, Mình quyết định research xem LC-2 là gì để hiểu kiến trúc tập lệnh của nó. Đây là kiến trúc của 1 máy tính giả lập Little Computer 2. Có thể tham khảo reference của nó tại đây: <a href="https://www.cs.utexas.edu/~fussell/courses/cs310h/simulator/lc2.pdf" target="_blank" rel="noopener noreffer ">https://www.cs.utexas.edu/~fussell/courses/cs310h/simulator/lc2.pdf</a></p>
+<p>Dựa theo tài liệu này mình viết 1 script để dịch các Opcode dễ đọc hơn.</p>
+<pre tabindex="0"><code>with open(&#34;RAM&#34;) as f:
+    RAM = f.read()
+f.close()
+RAM = [&#39;&#39;.join(RAM.split(&#34;,&#34;))[16*i:16*(i+1)] for i in range(len(RAM.split(&#34;,&#34;))//16)][1:]
+map = {
+    &#34;0001&#34;: &#34;ADD  &#34;,
+    &#34;0101&#34;: &#34;AND  &#34;,
+    &#34;0000&#34;: &#34;BR   &#34;,
+    &#34;0100&#34;: &#34;JSR  &#34;,
+    &#34;1100&#34;: &#34;JSRR &#34;,
+    &#34;0010&#34;: &#34;LD   &#34;,
+    &#34;1010&#34;: &#34;LDI  &#34;,
+    &#34;0110&#34;: &#34;LDR  &#34;,
+    &#34;1110&#34;: &#34;LEA  &#34;,
+    &#34;1001&#34;: &#34;NOT  &#34;,
+    &#34;1101&#34;: &#34;RET  &#34;,
+    &#34;1000&#34;: &#34;RTI  &#34;,
+    &#34;0011&#34;: &#34;ST   &#34;,
+    &#34;1011&#34;: &#34;STI  &#34;,
+    &#34;0111&#34;: &#34;STR  &#34;,
+    &#34;1111&#34;: &#34;TRAP &#34;
+}
+
+RAM = &#39;\n&#39;.join([map[i[0:4]]+i[4:] for i in RAM])
+
+print(RAM)
+</code></pre><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png, http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png 1.5x, http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png"
+        title="http://note.bksec.vn/pad/uploads/5cae6de9-d45a-4ceb-bb0f-651331a34058.png" /></p>
+<p>Nhìn thì có vẻ dài nhưng mình thấy đây là một chuỗi các khối lệnh lặp lại.</p>
+<pre tabindex="0"><code>LD R2, ??
+LD R1, ??
+ADD R0, R1, R2
+ST R0, ??
+Trap x25
+BR ?
+.....
+</code></pre><p>Phần còn lại có vẻ không có ý nghĩa, vì thế mình tập trung vào các khối lệnh này. Ở đây lệnh <code>Trap x25</code> sẽ làm chương trình dừng thực thi ở mỗi khối lệnh, do vậy để mô phỏng lại chính xác chương trình làm gì mình sẽ patch sạch các câu lệnh này về nope.</p>
+<p>Như vậy ý tưởng sẽ là patch tất cả các câu lệnh <code>Trap x25</code> bằng nop và bỏ qua các lệnh còn lại, thử interpret các giá trị từ RAM rồi chạy xem. Kết quả thì mình thu được flag.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png, http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png 1.5x, http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png"
+        title="http://note.bksec.vn/pad/uploads/f15102cb-f4b7-49ce-a609-99340005cc1f.png" /></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>state = {
+    &#34;PC&#34;: 0,
+    &#34;registers&#34;: [0,0,0,0,0,0,0,0],
+    &#34;RAM&#34; : None
+}
+
+def RAMload():
+    global state
+    with open(&#34;RAM&#34;) as f:
+        state[&#34;RAM&#34;] = f.read()
+    f.close()
+    state[&#34;RAM&#34;] = [&#39;&#39;.join(state[&#34;RAM&#34;].split(&#34;,&#34;))[16*i:16*(i+1)] for i in range(len(state[&#34;RAM&#34;].split(&#34;,&#34;))//16)][1:]
+
+def simulate():
+    global state
+    map = {
+        &#34;0001&#34;: add,
+        &#34;0101&#34;: nope,
+        &#34;0000&#34;: jump,
+        &#34;0100&#34;: nope,
+        &#34;1100&#34;: nope,
+        &#34;0010&#34;: load,
+        &#34;1010&#34;: nope,
+        &#34;0110&#34;: nope,
+        &#34;1110&#34;: nope,
+        &#34;1001&#34;: nope,
+        &#34;1101&#34;: nope,
+        &#34;1000&#34;: nope,
+        &#34;0011&#34;: store,
+        &#34;1011&#34;: nope,
+        &#34;0111&#34;: nope,
+        &#34;1111&#34;: trap
+    }
+    while state[&#34;PC&#34;] != len(state[&#34;RAM&#34;]):
+        curr_instruction = state[&#34;RAM&#34;][state[&#34;PC&#34;]]
+        map[curr_instruction[:4]](curr_instruction[4:])
+    print()
+
+def nope(data):
+    pass
+
+def add(data):
+    global state
+    state[&#34;registers&#34;][0] = state[&#34;registers&#34;][1] + state[&#34;registers&#34;][2]
+    print(chr(state[&#34;registers&#34;][0]),end=&#39;&#39;)
+    state[&#34;PC&#34;] += 1
+
+def jump(data):
+    global state
+    addr = int(data[3:],2)
+    if addr:
+        state[&#34;PC&#34;] = addr
+    else:
+        state[&#34;PC&#34;] += 1
+
+def load(data):
+    global state
+    DR = int(data[:3],2)
+    addr = int(data[3:],2)
+    state[&#34;registers&#34;][DR] = int(state[&#34;RAM&#34;][addr],2)
+    state[&#34;PC&#34;] += 1
+
+def store(data):
+    global state
+    state[&#34;PC&#34;] += 1
+
+def trap(data):
+    global state
+    state[&#34;PC&#34;] += 1
+
+def print_state():
+    global state
+    print(&#34;PC: {PC} R0: {R0} R1: {R1} R2: {R2}&#34;.format(PC=state[&#34;PC&#34;],R0=state[&#34;registers&#34;][0],R1=state[&#34;registers&#34;][1],R2=state[&#34;registers&#34;][2]))
+
+if __name__ == &#34;__main__&#34;:
+    RAMload() 
+    simulate() 
+</code></pre></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-04-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/intro/" data-title="K!nd4SUS CTF 2025"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/intro/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/intro/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/intro/" data-title="K!nd4SUS CTF 2025"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/intro/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/posts/utctf/" class="next" rel="next" title="UTCTF 2025">UTCTF 2025<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.5.3/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/typeit@8.6.0/dist/index.umd.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/copy-tex.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":80},"comment":{"valine":{"appId":"your-leancloud-appId","appKey":"your-leancloud-appKey","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@15.1.2/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Comment...","recordIP":false,"visitor":true}},"data":{"id-1":"Cr0nica1","id-2":"Cr0nica1"},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":true,"left":"$$","right":"$$"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"},{"display":false,"left":"$","right":"$"}],"strict":false},"search":{"highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.bfc24322c1c736fc87270bfd02b29a3f1ec4316ce28d843a95e7f86122d3014725629b2cbba45f999fae1ec040433cefdf4a20bf2bf2aae4698cb1e66eafeb42.js" integrity="sha512-v8JDIsHHNvyHJwv9ArKaPx7EMWzijYQ6lef4YSLTAUclYpssu6RfmZ+uHsBAQzzv30ogvyvyquRpjLHmbq/rQg=="></script></body>
+</html>

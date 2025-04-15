@@ -98,68 +98,188 @@
         alt="/images/avt.jpg"
         title="/images/avt.jpg" /></div><h1 class="home-title">Wellcome Hackers</h1><div class="home-subtitle"><div id="id-3" class="typeit"></div></div><div class="links"><a href="https://github.com/cr0nica1" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github fa-fw" aria-hidden="true"></i></a><a href="https://linkedin.com/in/minh-ho%c3%a0ng-ti%e1%ba%bfn" title="LinkedIn" target="_blank" rel="noopener noreffer me"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="mailto:minhtoanlamson2005@gmail.com" title="Email" rel="me"><i class="far fa-envelope fa-fw" aria-hidden="true"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw" aria-hidden="true"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/dhweb/">Dreamhack Web Wargame</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Sau một thời gian dài cùng với các mảng CTF về ngôn ngữ low-level, mình nghĩ rằng đã đến lúc mình cần một cái gì đó mới mẻ hơn, offensive hơn và web là lựa chọn đó. Ở đây mình sẽ chỉ sưu tầm những chall mình đánh giá là hay, có thể nó không khó nhưng bổ sung cho mình nhiều điều mới mẻ.</p>
-<h2 id="ez_command_injection">EZ_command_injection</h2>
-<h3 id="1-recon">1. Recon</h3>
-<p>Check mã nguồn Web có 2 endpoint là &lsquo;/&rsquo;, &lsquo;/ping&rsquo;. Khi gửi request &lsquo;GET&rsquo; đến endpoint &lsquo;/ping&rsquo; thì chương trình sẽ đọc IP là giá trị của biến host, sau đó gọi lệnh hệ thống để ping.</p></div><div class="post-footer">
-        <a href="/posts/dhweb/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/dhctf%237r5/">Dreamhack CTF Season 7 Round #5 (🚩Div1)</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.</p>
-<h2 id="chat-with-me---binary-exploitation">Chat with Me - Binary exploitation</h2>
-<h3 id="i-vulnerability">I. Vulnerability</h3>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/SJxenTYj1l.png"
-        data-srcset="https://hackmd.io/_uploads/SJxenTYj1l.png, https://hackmd.io/_uploads/SJxenTYj1l.png 1.5x, https://hackmd.io/_uploads/SJxenTYj1l.png 2x"
-        data-sizes="auto"
-        alt="https://hackmd.io/_uploads/SJxenTYj1l.png"
-        title="image" /></p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://hackmd.io/_uploads/B1rb3aFi1g.png"
-        data-srcset="https://hackmd.io/_uploads/B1rb3aFi1g.png, https://hackmd.io/_uploads/B1rb3aFi1g.png 1.5x, https://hackmd.io/_uploads/B1rb3aFi1g.png 2x"
-        data-sizes="auto"
-        alt="https://hackmd.io/_uploads/B1rb3aFi1g.png"
-        title="image" /></p>
-<p>Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:</p></div><div class="post-footer">
-        <a href="/posts/dhctf%237r5/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/research/">Research: Packing và Unpacking trong reverse engineering</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><blockquote>
-<p>SLIDE bài thuyết trình: <a href="https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&amp;utm_campaign=designshare&amp;utm_medium=link2&amp;utm_source=sharebutton" target="_blank" rel="noopener noreffer ">https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton</a></p></blockquote>
-<p>Packing là một trong những kỹ thuật cơ bản về bảo vệ file. Đối với các reverser, unpacking là công cụ đắc lực để vượt qua kỹ thuật anti-reverse khá mạnh mẽ này. Hầu hết mọi thứ về phương pháp phân tích thì đều có ở trong slide trên, bài viết này của mình sẽ chỉ tóm tắt lại ý chính từ bài thuyết trình.</p></div><div class="post-footer">
-        <a href="/posts/research/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/squirrel/">squ1rrel CTF 2025</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>squ1rrel là một giải khá ít challenge rev, chỉ có 3 bài. Mình tham gia giải này song song Breach nên cũng chỉ kịp đóng góp cho team 1 bài.</p>
-<h2 id="intermediate-software-design---reverse-engineering">Intermediate Software Design - reverse engineering</h2>
-<h3 id="1-static-analysis">1. Static Analysis</h3>
-<p>Chương trình chỉ gồm có duy nhất 1 hàm main, nhận input và xử lý nó. Logic xử lý của chương trình lại không quá phức tạp, nó chủ yếu nằm ở đoạn sau.</p></div><div class="post-footer">
-        <a href="/posts/squirrel/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/breach/">Breach CTF 2025</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Breach có lẽ là giải khá khó chịu với mình vì không có nhiều chall thuần về reversing logic và xác định luồng truyền thống, mặt khác nó lại có phần tricky ở nhiều chall. Ở giải này chỉ có mình mình giải 1 chall.</p>
-<h2 id="fraction-fun---rev">Fraction Fun - rev</h2>
+        <a href="/posts/utctf/">UTCTF 2025</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.</p>
+<h2 id="ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</h2>
 <h3 id="1-analysis">1. Analysis</h3>
-<p>Chall cho biết file mã nguồn của chương trình xác thực trên server. Cần phải nhập chính xác số cần nhập để sau các phép biến đổi, kết quả sẽ bằng kết quả trong output.txt. Logic chương trình khá đơn giản, chỉ là vòng lặp sau.</p></div><div class="post-footer">
-        <a href="/posts/breach/">Read More</a></div>
+<p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 1.5x, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
+        title="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png" /></p>
+<p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p></div><div class="post-footer">
+        <a href="/posts/utctf/">Read More</a></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/htb/">Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.</p>
-<h1 id="writeup">Writeup</h1>
-<h2 id="singlestep---rev">Singlestep - rev</h2>
-<h3 id="1-static-analysis">1. Static Analysis</h3>
-<p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p></div><div class="post-footer">
-        <a href="/posts/htb/">Read More</a></div>
-</article><ul class="pagination"><li class="page-item active">
+        <a href="/posts/intro/">K!nd4SUS CTF 2025</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.</p>
+<h2 id="i-the-kindling-of-the-first-flag---reverse-engineering">I. The kindling of the first Flag - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Chall là một file python về một trò chơi tìm path thỏa mãn để chương trình in ra flag.</p>
+<pre tabindex="0"><code>import hashlib
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import base64
+import random
+
+FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM+x7vRw2qOr3ORbw==&#34;
+RED = &#34;\033[0;31m&#34;
+PURPLE = &#34;\033[0;35m&#34;
+ITALIC = &#34;\033[3m&#34;
+BOLD = &#34;\033[1m&#34;
+UNDERLINE = &#34;\033[4m&#34;
+END = &#34;\033[0m&#34;
+
+# don&#39;t mind the crypto stuff
+class Cipher:
+    def encrypt(self, plainText, key):
+        iv = os.urandom(16) 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() 
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv)
+        encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size))  
+        return base64.b64encode(iv + encryptedBytes).decode()
+
+    def decrypt(self, encrypted, key):
+        encryptedData = base64.b64decode(encrypted) 
+        iv = encryptedData[:16] 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest()  
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv) 
+        try:
+            decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size)  
+        except:
+            die(1)
+        return decryptedBytes.decode()
+
+
+places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;]
+
+routes = [
+    [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;],
+    [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;],
+    [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;],
+    [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;],
+    [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;],
+    [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;],
+    [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;],
+    [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;],
+    [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;],
+    [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;],
+    [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;],
+    [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;],
+    [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;],
+    [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;],
+    [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;]
+]
+
+position = &#34;&#34;
+path = []
+
+def checkFlag():
+    global path
+    aes = Cipher()
+
+    a = &#34;&#34; 
+    b = &#34;&#34;
+    for p in path:
+        if path.index(p) % 2 == 0:
+            a += f&#34;{p[0]+p[-1]}&#34;
+        else:
+            b += f&#34;{p[0]+p[-1]}&#34;
+
+    key = a+b
+    attempt = aes.decrypt(FLAG,key)
+
+    if &#34;KSUS&#34; not in attempt:
+        die(1)
+    else:
+        print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;)
+        print(f&#34;{PURPLE}{attempt}{END}&#34;)
+        exit()
+
+
+def printLocationDetails():
+    global position
+    print(f&#34;\nYou find yourself in a place called {PURPLE}{BOLD}{position.upper()}{END}.&#34;)
+    print(&#34;A number of dangerous paths, crawling with enemies, open in front of you... An infinite sea of possibilities.\nWhere will you go?\n&#34;)
+    for i,r in enumerate(routes[places.index(position)][1:]):
+        print(f&#34;\t{i}. {r}&#34;)
+
+
+def die(way):
+    quotes = [
+        f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;,
+        f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;,
+        f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;,
+        f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34;
+    ]
+    if way:
+        print(f&#34;\n{random.choice(quotes)}&#34;)
+    else:
+        print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;)
+
+    print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;)
+    exit()
+
+
+def proceed(next):
+    global position
+    if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+        if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+    elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0:   
+        if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))):
+            die(1)
+    elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;:  
+        if next &gt; (True &lt;&lt; True):
+            die(1)
+    elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: 
+        if next &gt; (sum(map(int,str(111111)[::2]))):
+            die(1)
+
+    path.append(routes[places.index(position)][next])   
+    position = routes[places.index(position)][next]
+        
+
+def play():
+    global position
+    global path
+    while True:
+        if position != &#34;Kiln of the First Flame&#34; and len(path) &lt; 22: 
+            printLocationDetails() 
+            next = int(input(&#34;\nChoose a number &gt;   &#34;))
+            if next &lt; 0 or next &gt; 3:
+                exit()
+            proceed(next+1)
+        elif position == &#34;Kiln of the First Flame&#34;:   
+            checkFlag()
+        elif len(path) &gt;= 22:
+            die(0)
+
+
+def main():
+    global position
+    print(f&#34;\n{ITALIC}You slowly rise as you are awaken by a sweet and ageless voice. \n&#39;Let the Flame guide thee in this search for the flag&#39;, she whispers softly into your ear. \nBefore you can ask any questions, she disappears. \n\nYou are now left in utter silence.{END}\n&#34;)
+    print(f&#34;\t{UNDERLINE}PRESS ENTER TO CONTINUE{END}&#34;)
+    input()
+    position = &#34;Cemetery of Ash&#34;
+    path.append(position)  
+    play()
+
+
+if __name__ == &#34;__main__&#34;:
+    main()
+    
+</code></pre><p>Khi đạt điều kiện kết thúc của path ( đến vị trí Kiln of the First Flame hoặc độ dài path lớn hơn 22) thì chương trình sẽ gọi check flag. Ở đây chương trình sinh string bằng 1 thuật toán xử lý từ list path, sau đó đưa kết quả thu được mã hóa bằng hàm băm sha256, rồi lấy nó làm key để giải mã Flag. Hàm băm sha256 là không thể đảo ngược ( hoặc có thể theo một vài pháp sư Trung hoa tuyên bố :v ) do vậy phương án mình nghĩ ra là brute force, do số đường đi vẫn đủ nhỏ chấp nhận được.</p></div><div class="post-footer">
+        <a href="/posts/intro/">Read More</a></div>
+</article><ul class="pagination"><li class="page-item ">
                     <span class="page-link">
                         <a href="/">1</a>
                     </span>
-                </li><li class="page-item ">
+                </li><li class="page-item active">
                     <span class="page-link">
                         <a href="/page/2/">2</a>
                     </span>

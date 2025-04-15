@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/htb/">
+  <meta property="og:site_name" content="Cr0nica1">
+  <meta property="og:title" content="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria">
+  <meta property="og:description" content="Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.
+Writeup Singlestep - rev 1. Static Analysis Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-16T03:10:02+07:00">
+    <meta property="article:modified_time" content="2025-04-16T03:10:02+07:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria">
+  <meta name="twitter:description" content="Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.
+Writeup Singlestep - rev 1. Static Analysis Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.">
+<meta name="application-name" content="Cr0nica1">
+<meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/htb/" /><link rel="prev" href="https://cr0nica1.github.io/posts/utctf/" /><link rel="next" href="https://cr0nica1.github.io/posts/breach/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/cr0nica1.github.io\/posts\/htb\/"
+        },"genre": "posts","wordcount":  4367 ,
+        "url": "https:\/\/cr0nica1.github.io\/posts\/htb\/","datePublished": "2025-04-16T03:10:02+07:00","dateModified": "2025-04-16T03:10:02+07:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "cr0nica1"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('dark' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'dark' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Cr0nica1"><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="search..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Cr0nica1"><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="search..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-04-16">2025-04-16</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;4367 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;21 minutes&nbsp;<span id="/posts/htb/" class="leancloud_visitors" data-flag-title="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria">
+                        <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#singlestep---rev">Singlestep - rev</a>
+      <ul>
+        <li><a href="#1-static-analysis">1. Static Analysis</a></li>
+        <li><a href="#2-dynamic-analysis">2. Dynamic analysis</a></li>
+        <li><a href="#3-script">3. Script</a></li>
+        <li><a href="#4-another-approach">4. Another approach</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.</p>
+<h1 id="writeup">Writeup</h1>
+<h2 id="singlestep---rev">Singlestep - rev</h2>
+<h3 id="1-static-analysis">1. Static Analysis</h3>
+<p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png, http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png 1.5x, http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png"
+        title="http://note.bksec.vn/pad/uploads/611c44ee-d31b-48bd-a3fa-0b72f43c105f.png" /></p>
+<p>Ở bên trong này, chúng ta thấy một đoạn dài mã thực thi thuộc section .text mà IDA không đọc được code x64 asm. Nhìn vào các lệnh xor, mình nhận ra rằng chương trình sẽ giải mã các vùng mã không đọc được đó bằng xor, thực thi lệnh ở đó rồi lại xor lại để mã hóa 1 lần nữa. Do vậy đoạn mã này chỉ có thể đọc được trong runtime, không thể đọc được bằng cách disassemble thông thường. Cách duy nhất mình nghĩ được là lưu lại code được giải mã trong khi debug, tuy nhiên sẽ rất mất thời gian nên mình phải sử dụng script (được tài trợ bởi anh shynt_ :v) để lưu lại những đoạn code được deobfucasting trong khi chạy. Do mình quan tâm đến đoạn code từ sau khi nhập input nên mình sẽ deobfuscating kể từ đoạn yêu cầu nhập input. Lưu ý rằng trong tất cả các string được in ra màn hình, chỉ có duy nhất 1 string gọi printf là &ldquo;Please enter the ✨ secret ✨ bequeathed to his cult following:&rdquo;, do vậy script sẽ deobfuscating từ printf trong got.plt.</p>
+<pre tabindex="0"><code>import gdb
+
+gdb.execute(&#34;file singlestep&#34;)
+gdb.execute(&#34;break printf@plt&#34;)
+gdb.execute(&#34;run&#34;)
+
+log_file = open(&#34;log.txt&#34;, &#34;w&#34;)
+
+try:
+    while True:
+        gdb.execute(&#34;stepi&#34;, to_string=True)
+        output = gdb.execute(&#34;x/i $pc&#34;, to_string=True)
+        
+        if &#34;xor&#34; in output and (&#34;BYTE&#34; in output or &#34;WORD&#34; in output or &#34;DWORD&#34; in output):
+            continue
+
+        if &#34;nop&#34; in output:
+            continue
+
+        if &#34;pushfq&#34; in output:
+            continue
+
+        if &#34;popfq&#34; in output:
+            continue
+
+        if &#34;pushf&#34; in output:
+            continue
+
+        if &#34;popf&#34; in output:
+            continue
+
+        
+        # print(output.strip())
+        log_file.write(output)
+        log_file.flush()
+except KeyboardInterrupt:
+    print(&#34;&#34;)
+finally:
+    log_file.close()
+</code></pre><h3 id="2-dynamic-analysis">2. Dynamic analysis</h3>
+<p>Đặt breakpoint tại điểm đầu tiên của đoạn code được ghi lại bởi script trên. Tiếp tục sử dụng step into cho đến khi chương trình đọc input, nhập input rồi dừng lại.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png, http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png 1.5x, http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png"
+        title="http://note.bksec.vn/pad/uploads/950ceb83-4dab-4a20-958b-7e6b29dfef1c.png" /></p>
+<p>Mình vào file log.txt, cắt script kể từ đoạn này cho đến khi chương trình gọi lệnh puts. Đây sẽ là phần logic chính của chương trình.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b0a2:	mov    DWORD PTR [rbp-0x27c],eax
+=&gt; 0x55555555b0d9:	cmp    DWORD PTR [rbp-0x27c],0x0
+    → cmp operands: DWORD PTR [rbp-0x27c] = N/A, 0x0 = 0
+=&gt; 0x55555555b111:	js     0x55555555b2ba
+
+=&gt; 0x55555555b141:	mov    eax,DWORD PTR [rbp-0x27c]
+=&gt; 0x55555555b16e:	sub    eax,0x1
+=&gt; 0x55555555b18e:	cdqe
+=&gt; 0x55555555b1b1:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555b1da:	cmp    al,0xa
+    → cmp operands: $al = 10, 0xa = 10
+=&gt; 0x55555555b1fc:	jne    0x55555555b2ba
+
+=&gt; 0x55555555b22c:	mov    eax,DWORD PTR [rbp-0x27c]
+=&gt; 0x55555555b259:	sub    eax,0x1
+=&gt; 0x55555555b279:	cdqe
+=&gt; 0x55555555b29c:	mov    BYTE PTR [rbp+rax*1-0x210],0x0
+=&gt; 0x55555555b2d6:	lea    rax,[rbp-0x210]
+=&gt; 0x55555555b30b:	mov    rdi,rax
+=&gt; 0x55555555b333:	call   0x555555557690
+</code></pre><p>Đọc đoạn asm này kết hợp với debug, chúng ta dễ dàng nhận ra chương trình loại bỏ ký tự &ldquo;/n&rdquo; cuối cùng từ input, sau đó lưu lại giá trị này lên stack. Cuối đoạn mã này, chương trình đẩy địa chỉ của vùng nhớ chứa chuỗi input vào rdi.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555769c:	endbr64                            // kiem tra do dai input
+=&gt; 0x5555555576b5:	push   rbp
+=&gt; 0x5555555576d1:	mov    rbp,rsp
+=&gt; 0x5555555576f2:	sub    rsp,0x18
+=&gt; 0x55555555770e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555557734:	mov    QWORD PTR [rbp-0x8],0x0
+=&gt; 0x555555557765:	jmp    0x5555555577d0
+=&gt; 0x5555555577dc:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x5555555577fe:	movzx  eax,BYTE PTR [rax]
+=&gt; 0x55555555781e:	test   al,al
+=&gt; 0x555555557840:	jne    0x55555555777a
+
+=&gt; 0x55555555778d:	add    QWORD PTR [rbp-0x8],0x1
+=&gt; 0x5555555577b8:	add    QWORD PTR [rbp-0x18],0x1
+=&gt; 0x5555555577dc:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x5555555577fe:	movzx  eax,BYTE PTR [rax]
+=&gt; 0x55555555781e:	test   al,al
+=&gt; 0x555555557840:	jne    0x55555555777a
+</code></pre><p>Chương trình bắt đầu call một hàm, bên trong hàm này chương trình duyệt qua các ký tự của string và cập nhật kết quả độ dài của string. Khi vòng lặp kết thúc, chương trình lưu giá trị biến đếm vào rax và thoát khỏi hàm, sau đó so sánh độ dài string với 0x13.</p>
+<pre tabindex="0"><code>=&gt; 0x555555557867:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555557880:	leave
+=&gt; 0x55555555788a:	ret
+
+
+=&gt; 0x55555555b357:	cmp    rax,0x13               // kiem tra do dai string.
+    → cmp operands: $rax = 19, 0x13 = 19
+</code></pre><p>Nếu như độ dài string input thỏa mãn độ dài 19, rip của chương trình nhảy tiếp vào đoạn mã sau:</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b37c:	je     0x55555555b418                                       // loop kiem tra dieu kien dau tien
+=&gt; 0x55555555b437:	mov    DWORD PTR [rbp-0x294],0x0
+=&gt; 0x55555555b47c:	mov    BYTE PTR [rbp-0x296],0x1
+=&gt; 0x55555555b4be:	mov    DWORD PTR [rbp-0x290],0x0
+=&gt; 0x55555555b4fa:	jmp    0x55555555bd54
+=&gt; 0x55555555bd70:	cmp    DWORD PTR [rbp-0x290],0x12
+    → cmp operands: DWORD PTR [rbp-0x290] = N/A, 0x12 = 18
+=&gt; 0x55555555bda8:	jle    0x55555555b512
+
+=&gt; 0x55555555b527:	mov    edx,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b554:	movsxd rax,edx
+=&gt; 0x55555555b585:	imul   rax,rax,0x66666667
+=&gt; 0x55555555b5b4:	shr    rax,0x20
+=&gt; 0x55555555b5cf:	sar    eax,1
+=&gt; 0x55555555b5e7:	mov    ecx,edx
+=&gt; 0x55555555b606:	sar    ecx,0x1f
+=&gt; 0x55555555b626:	sub    eax,ecx
+=&gt; 0x55555555b63e:	mov    ecx,eax
+=&gt; 0x55555555b65d:	shl    ecx,0x2
+=&gt; 0x55555555b67d:	add    ecx,eax
+=&gt; 0x55555555b695:	mov    eax,edx
+=&gt; 0x55555555b6ad:	sub    eax,ecx
+=&gt; 0x55555555b6cc:	cmp    eax,0x4
+    → cmp operands: $eax = 0, 0x4 = 4
+=&gt; 0x55555555b6f6:	jne    0x55555555b8e4
+=&gt; 0x55555555b8f9:	mov    eax,DWORD PTR [rbp-0x294]
+=&gt; 0x55555555b926:	lea    edx,[rax+0x1]
+=&gt; 0x55555555b950:	mov    DWORD PTR [rbp-0x294],edx
+=&gt; 0x55555555b980:	mov    edx,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b9ad:	movsxd rdx,edx
+=&gt; 0x55555555b9d8:	movzx  edx,BYTE PTR [rbp+rdx*1-0x210]
+=&gt; 0x55555555ba01:	cdqe
+=&gt; 0x55555555ba2a:	mov    BYTE PTR [rbp+rax*1-0x110],dl
+=&gt; 0x55555555ba69:	movzx  edx,BYTE PTR [rbp-0x296]
+=&gt; 0x55555555baa1:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555bac7:	cdqe
+=&gt; 0x55555555baea:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555bb13:	cmp    al,0x40
+    → cmp operands: $al = 65, 0x40 = 64
+=&gt; 0x55555555bb35:	jle    0x55555555bc63
+=&gt; 0x55555555bb65:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555bb8b:	cdqe
+=&gt; 0x55555555bbae:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555bbd7:	cmp    al,0x5a
+    → cmp operands: $al = 65, 0x5a = 90
+=&gt; 0x55555555bbf9:	jg     0x55555555bc63
+=&gt; 0x55555555bc23:	mov    eax,0x1
+=&gt; 0x55555555bc4e:	jmp    0x55555555bc8e
+=&gt; 0x55555555bc99:	and    eax,edx
+=&gt; 0x55555555bcb1:	test   eax,eax
+=&gt; 0x55555555bcd0:	setne  al
+=&gt; 0x55555555bcfa:	mov    BYTE PTR [rbp-0x296],al
+=&gt; 0x55555555bd31:	add    DWORD PTR [rbp-0x290],0x1
+=&gt; 0x55555555bd70:	cmp    DWORD PTR [rbp-0x290],0x12
+    → cmp operands: DWORD PTR [rbp-0x290] = N/A, 0x12 = 18
+=&gt; 0x55555555bda8:	jle    0x55555555b512
+</code></pre><p>Đoạn mã này lặp qua các giá trị của string và kiểm tra điều kiện của mỗi ký tự. Ở các index không chia hết cho 4, chương trình sẽ kiểm tra xem giá trị có nằm trong khoảng từ 0x41 đến 0x5a hay không (các giá trị của ký tự chữ cái in hoa). Đối với trường hợp index chia hết cho 4, chương trình sẽ thực thi kiểm tra xem có phải 0x2d (tức &lsquo;-&rsquo;) hay không.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555b72d:	movzx  edx,BYTE PTR [rbp-0x296]
+=&gt; 0x55555555b765:	mov    eax,DWORD PTR [rbp-0x290]
+=&gt; 0x55555555b78b:	cdqe
+=&gt; 0x55555555b7ae:	movzx  eax,BYTE PTR [rbp+rax*1-0x210]
+=&gt; 0x55555555b7d7:	cmp    al,0x2d
+    → cmp operands: $al = 45, 0x2d = 45
+</code></pre><p>Tuy nhiên, chương trình chỉ lưu lại các giá trị từ 0x41 đến 0x5a (&lsquo;A&rsquo; đến &lsquo;Z&rsquo;). Sau khi loại bỏ hết các ký tự &lsquo;-&rsquo; trong string, chương trình tiếp tục duyệt qua từng phần tử một và thực hiện 1 logic biến đổi nào đó.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555bfed:	mov    eax,DWORD PTR [rbp-0x28c]      // loop 1
+=&gt; 0x55555555c024:	lea    edx,[rax*4+0x0]
+=&gt; 0x55555555c05c:	mov    eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c082:	add    eax,edx                               // k=4*i+j
+=&gt; 0x55555555c09a:	cdqe
+=&gt; 0x55555555c0bd:	movzx  eax,BYTE PTR [rbp+rax*1-0x110]       
+=&gt; 0x55555555c0ed:	movsx  eax,al
+=&gt; 0x55555555c114:	lea    edx,[rax-0x41]                 // edx=pos(input[k])
+=&gt; 0x55555555c13e:	mov    eax,DWORD PTR [rbp-0x28c]
+=&gt; 0x55555555c175:	imul   eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c1a3:	mov    ecx,eax
+=&gt; 0x55555555c1bb:	mov    eax,edx
+=&gt; 0x55555555c1d3:	sub    eax,ecx                   
+=&gt; 0x55555555c1f2:	movsxd rcx,eax                  //rcx=pos(input[k])-i*j
+=&gt; 0x55555555c21c:	mov    eax,DWORD PTR [rbp-0x288]
+=&gt; 0x55555555c249:	movsxd rdx,eax
+=&gt; 0x55555555c273:	mov    eax,DWORD PTR [rbp-0x28c]
+=&gt; 0x55555555c2a0:	movsxd rsi,eax
+=&gt; 0x55555555c2d1:	lea    rax,[rbp-0x250]             
+=&gt; 0x55555555c306:	mov    rdi,rax                                    
+=&gt; 0x55555555c32e:	call   0x555555556180
+
+
+
+=&gt; 0x55555555618c:	endbr64
+=&gt; 0x5555555561a5:	push   rbp
+=&gt; 0x5555555561c1:	mov    rbp,rsp
+=&gt; 0x5555555561e2:	sub    rsp,0x30
+=&gt; 0x5555555561fe:	mov    QWORD PTR [rbp-0x18],rdi     // 4
+=&gt; 0x55555555621a:	mov    QWORD PTR [rbp-0x20],rsi    //  i
+=&gt; 0x555555556236:	mov    QWORD PTR [rbp-0x28],rdx    // j
+=&gt; 0x555555556252:	mov    QWORD PTR [rbp-0x30],rcx    // pos(input[k])-i*j
+=&gt; 0x55555555626e:	mov    rax,QWORD PTR [rbp-0x18]    
+=&gt; 0x555555556290:	mov    rax,QWORD PTR [rax]          
+=&gt; 0x5555555562b1:	cmp    QWORD PTR [rbp-0x20],rax    // cmp i,4
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x5555555562d6:	jb     0x555555556343
+=&gt; 0x55555555634f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555636b:	mov    rax,QWORD PTR [rax+0x8]    
+=&gt; 0x555555556387:	cmp    QWORD PTR [rbp-0x28],rax          // cmp j,4
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4           
+=&gt; 0x5555555563ac:	jb     0x555555556419
+
+=&gt; 0x555555556425:	mov    rax,QWORD PTR [rbp-0x18]    //
+=&gt; 0x555555556441:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556464:	imul   rax,QWORD PTR [rbp-0x20]    
+=&gt; 0x55555555648e:	mov    rdx,rax
+=&gt; 0x5555555564af:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x5555555564d1:	add    rax,rdx                  
+=&gt; 0x5555555564f2:	mov    QWORD PTR [rbp-0x8],rax       // QWORD PTR [rbp-0x8]=k
+=&gt; 0x55555555650e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555652a:	mov    rdx,QWORD PTR [rax+0x10]    // rdx=0x555555574a40   # memory 1
+=&gt; 0x555555556546:	mov    rax,QWORD PTR [rbp-0x8]   
+=&gt; 0x555555556562:	shl    rax,0x3                        // shl 4*i+j,0x3
+=&gt; 0x555555556584:	add    rdx,rax
+=&gt; 0x5555555565a5:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x5555555565c7:	mov    QWORD PTR [rdx],rax                    // 0x555555574a40+(shl k,0x3) : pos(input[k])-i*j
+=&gt; 0x5555555565ef:	mov    eax,0x1
+=&gt; 0x555555556610:	leave
+=&gt; 0x55555555661a:	ret
+=&gt; 0x55555555c362:	add    DWORD PTR [rbp-0x288],0x1                      cap nhat index moi hang
+=&gt; 0x55555555c3a1:	cmp    DWORD PTR [rbp-0x288],0x3
+    → cmp operands: DWORD PTR [rbp-0x288] = N/A, 0x3 = 3
+=&gt; 0x55555555c3d9:	jle    0x55555555bfd8
+</code></pre><p>Đoạn mã này tải các đoạn 4 ký tự một và lưu vào 1 địa chỉ, mình dựng lại như sau.</p>
+<pre tabindex="0"><code>k=4*i+j
+for(i=0;i&lt;4;i++){
+    for(j=0;j&lt;4;j++){
+    (QWORD *) (0x555555574a40+k&lt;&lt;0x3)=input[k]-0x41-i*j
+    }
+}
+</code></pre><p>Như vậy chương trình tạo một ma trận 4x4 gồm các giá trị là khoảng cách từ vị trí của ký tự đến &lsquo;A&rsquo; rồi trừ đi i*j. Tiếp tục debug chương trình ta gặp đoạn mã sau.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555c5ff:	call   0x555555556630    /// phep nhan ma tran
+
+=&gt; 0x55555555663c:	endbr64
+=&gt; 0x555555556655:	push   rbp
+=&gt; 0x555555556671:	mov    rbp,rsp
+=&gt; 0x555555556692:	sub    rsp,0x50
+=&gt; 0x5555555566ae:	mov    QWORD PTR [rbp-0x38],rdi
+=&gt; 0x5555555566ca:	mov    QWORD PTR [rbp-0x40],rsi
+=&gt; 0x5555555566e6:	mov    QWORD PTR [rbp-0x48],rdx
+=&gt; 0x555555556713:	mov    rax,QWORD PTR fs:0x28
+=&gt; 0x555555556745:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x555555556779:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556795:	mov    rdx,QWORD PTR [rax+0x8]
+=&gt; 0x5555555567b1:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x5555555567d3:	mov    rax,QWORD PTR [rax]
+=&gt; 0x5555555567fa:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556824:	je     0x555555556891
+=&gt; 0x55555555689d:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x5555555568bf:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555568e0:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556902:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555556929:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556953:	jne    0x555555556a31
+=&gt; 0x55555555697a:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x555555556996:	mov    rdx,QWORD PTR [rax+0x8]
+=&gt; 0x5555555569b2:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x5555555569ce:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x5555555569f0:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555556a1a:	je     0x555555556a87
+=&gt; 0x555555556aa3:	mov    DWORD PTR [rbp-0x2c],0x0
+=&gt; 0x555555556ad9:	jmp    0x55555555749f
+=&gt; 0x5555555574b1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x5555555574d8:	movsxd rdx,eax
+=&gt; 0x5555555574f9:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x55555555751b:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555557542:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x55555555756c:	jb     0x555555556af1
+=&gt; 0x555555556b0d:	mov    DWORD PTR [rbp-0x28],0x0
+=&gt; 0x555555556b43:	jmp    0x5555555573a6
+=&gt; 0x5555555573b8:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555573df:	movsxd rdx,eax
+=&gt; 0x555555557400:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x55555555741c:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x55555555743e:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x555555557468:	jb     0x555555556b5b
+=&gt; 0x555555556b71:	mov    QWORD PTR [rbp-0x10],0x0
+=&gt; 0x555555556bab:	mov    DWORD PTR [rbp-0x24],0x0
+=&gt; 0x555555556be1:	jmp    0x5555555570bb
+=&gt; 0x5555555570cd:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x5555555570f4:	movsxd rdx,eax
+=&gt; 0x555555557115:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555557137:	mov    rax,QWORD PTR [rax]
+=&gt; 0x55555555715e:	cmp    rdx,rax
+    → cmp operands: $rdx = 0, $rax = 4
+=&gt; 0x555555557188:	jb     0x555555556bf9
+=&gt; 0x555555556c0f:	mov    QWORD PTR [rbp-0x20],0x0
+=&gt; 0x555555556c43:	mov    QWORD PTR [rbp-0x18],0x0
+=&gt; 0x555555556c73:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556c9a:	movsxd rdx,eax
+=&gt; 0x555555556cc1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x555555556ce8:	movsxd rsi,eax
+=&gt; 0x555555556d09:	lea    rcx,[rbp-0x20]
+=&gt; 0x555555556d25:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x555555556d47:	mov    rdi,rax
+
+=&gt; 0x555555556d6f:	call   0x555555555ca0
+
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+=&gt; 0x555555556db9:	test   al,al
+=&gt; 0x555555556ddb:	je     0x555555556e48
+=&gt; 0x555555556e5a:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x555555556e81:	movsxd rdx,eax
+=&gt; 0x555555556ea8:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556ecf:	movsxd rsi,eax
+=&gt; 0x555555556ef0:	lea    rcx,[rbp-0x18]
+=&gt; 0x555555556f0c:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555556f2e:	mov    rdi,rax
+=&gt; 0x555555556f56:	call   0x555555555ca0
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+
+=&gt; 0x555555555cac:	endbr64
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x555555555fae:	mov    rdx,rax
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3
+=&gt; 0x5555555560a4:	add    rax,rdx
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+
+=&gt; 0x555555556db9:	test   al,al
+=&gt; 0x555555556ddb:	je     0x555555556e48
+=&gt; 0x555555556e5a:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x555555556e81:	movsxd rdx,eax
+=&gt; 0x555555556ea8:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x555555556ecf:	movsxd rsi,eax
+=&gt; 0x555555556ef0:	lea    rcx,[rbp-0x18]
+=&gt; 0x555555556f0c:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555556f2e:	mov    rdi,rax
+=&gt; 0x555555556f56:	call   0x555555555ca0
+...........
+
+=&gt; 0x555555556fa0:	test   al,al
+=&gt; 0x555555556fc2:	je     0x55555555702f
+=&gt; 0x55555555703b:	mov    rdx,QWORD PTR [rbp-0x20]
+=&gt; 0x555555557057:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555557073:	imul   rax,rdx
+=&gt; 0x55555555708f:	add    QWORD PTR [rbp-0x10],rax
+=&gt; 0x5555555570ab:	add    DWORD PTR [rbp-0x24],0x1
+=&gt; 0x5555555570cd:	mov    eax,DWORD PTR [rbp-0x24]
+=&gt; 0x5555555570f4:	movsxd rdx,eax
+=&gt; 0x555555557115:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x555555557137:	mov    rax,QWORD PTR [rax]
+=&gt; 0x55555555715e:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555557188:	jb     0x555555556bf9
+=&gt; 0x5555555571b5:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555571dc:	movsxd rdx,eax
+=&gt; 0x555555557203:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x55555555722a:	movsxd rsi,eax
+=&gt; 0x55555555724b:	mov    rcx,QWORD PTR [rbp-0x10]
+=&gt; 0x555555557267:	mov    rax,QWORD PTR [rbp-0x48]
+=&gt; 0x555555557289:	mov    rdi,rax
+=&gt; 0x5555555572b1:	call   0x555555556180
+=&gt; 0x55555555618c:	endbr64
+=&gt; 0x5555555561a5:	push   rbp
+=&gt; 0x5555555561c1:	mov    rbp,rsp
+=&gt; 0x5555555561e2:	sub    rsp,0x30
+=&gt; 0x5555555561fe:	mov    QWORD PTR [rbp-0x18],rdi
+=&gt; 0x55555555621a:	mov    QWORD PTR [rbp-0x20],rsi
+=&gt; 0x555555556236:	mov    QWORD PTR [rbp-0x28],rdx
+=&gt; 0x555555556252:	mov    QWORD PTR [rbp-0x30],rcx
+=&gt; 0x55555555626e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555556290:	mov    rax,QWORD PTR [rax]
+=&gt; 0x5555555562b1:	cmp    QWORD PTR [rbp-0x20],rax
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x5555555562d6:	jb     0x555555556343
+=&gt; 0x55555555634f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555636b:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556387:	cmp    QWORD PTR [rbp-0x28],rax
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x5555555563ac:	jb     0x555555556419
+=&gt; 0x555555556425:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555556441:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x555555556464:	imul   rax,QWORD PTR [rbp-0x20]
+=&gt; 0x55555555648e:	mov    rdx,rax
+=&gt; 0x5555555564af:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x5555555564d1:	add    rax,rdx
+=&gt; 0x5555555564f2:	mov    QWORD PTR [rbp-0x8],rax
+=&gt; 0x55555555650e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555652a:	mov    rdx,QWORD PTR [rax+0x10]
+=&gt; 0x555555556546:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556562:	shl    rax,0x3
+=&gt; 0x555555556584:	add    rdx,rax
+=&gt; 0x5555555565a5:	mov    rax,QWORD PTR [rbp-0x30]
+=&gt; 0x5555555565c7:	mov    QWORD PTR [rdx],rax
+=&gt; 0x5555555565ef:	mov    eax,0x1
+=&gt; 0x555555556610:	leave
+=&gt; 0x55555555661a:	ret
+=&gt; 0x5555555572fb:	test   al,al
+=&gt; 0x55555555731d:	je     0x55555555738a
+=&gt; 0x555555557396:	add    DWORD PTR [rbp-0x28],0x1
+=&gt; 0x5555555573b8:	mov    eax,DWORD PTR [rbp-0x28]
+=&gt; 0x5555555573df:	movsxd rdx,eax
+=&gt; 0x555555557400:	mov    rax,QWORD PTR [rbp-0x40]
+=&gt; 0x55555555741c:	mov    rax,QWORD PTR [rax+0x8]
+=&gt; 0x55555555743e:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x555555557468:	jb     0x555555556b5b
+=&gt; 0x55555555748f:	add    DWORD PTR [rbp-0x2c],0x1
+=&gt; 0x5555555574b1:	mov    eax,DWORD PTR [rbp-0x2c]
+=&gt; 0x5555555574d8:	movsxd rdx,eax
+=&gt; 0x5555555574f9:	mov    rax,QWORD PTR [rbp-0x38]
+=&gt; 0x55555555751b:	mov    rax,QWORD PTR [rax]
+=&gt; 0x555555557542:	cmp    rdx,rax
+    → cmp operands: $rdx = 4, $rax = 4
+=&gt; 0x55555555756c:	jb     0x555555556af1
+=&gt; 0x55555555759a:	mov    eax,0x1
+=&gt; 0x5555555575be:	mov    rdx,QWORD PTR [rbp-0x8]
+.......
+</code></pre><p>Mình đọc đoạn mã này trong text lại khá là dài và cũng không hiểu rõ nó làm gì. Nhờ gợi ý của mọi người nên mình thử một vài input đặc biệt rồi debug, cuối cùng mình đoán được đây là một đoạn mã thực hiện việc nhân ma trận được tạo từ input và 1 ma trận được chương trình tạo sẵn.</p>
+<pre tabindex="0"><code>=&gt; 0x55555555c890:	mov    eax,DWORD PTR [rbp-0x284]  i  //loop 2
+=&gt; 0x55555555c8c0:	cmp    eax,DWORD PTR [rbp-0x280]  // j
+    → cmp operands: $eax = 0, DWORD PTR [rbp-0x280] = N/A // cmp j,i
+=&gt; 0x55555555c8f0:	jne    0x55555555caa5
+
+=&gt; 0x55555555c927:	movzx  edx,BYTE PTR [rbp-0x295]       edx=1(1)
+=&gt; 0x55555555c966:	mov    rax,QWORD PTR [rbp-0x278]    
+=&gt; 0x55555555c995:	cmp    rax,0x1                            
+    → cmp operands: $rax = -600, 0x1 = 1              cmp q(0x7fffffffda68),1
+=&gt; 0x55555555c9b7:	sete   al          // al=0
+=&gt; 0x55555555c9de:	movzx  eax,al
+=&gt; 0x55555555c9fe:	and    eax,edx         // eax=0
+=&gt; 0x55555555ca16:	test   eax,eax      
+=&gt; 0x55555555ca35:	setne  al         // al=1
+=&gt; 0x55555555ca5f:	mov    BYTE PTR [rbp-0x295],al ///   BYTE PTR [rbp-0x295] =1
+=&gt; 0x55555555ca8d:	jmp    0x55555555cc1f
+=&gt; 0x55555555cc3b:	add    DWORD PTR [rbp-0x280],0x1               // counter DWORD PTR [rbp-0x280]
+=&gt; 0x55555555cc7a:	cmp    DWORD PTR [rbp-0x280],0x3
+    → cmp operands: DWORD PTR [rbp-0x280] = N/A, 0x3 = 3
+=&gt; 0x55555555ccb2:	jle    0x55555555c6fd
+
+
+=&gt; 0x55555555c712:	mov    eax,DWORD PTR [rbp-0x280] 
+=&gt; 0x55555555c73f:	movsxd rdx,eax                 //rdx=j
+=&gt; 0x55555555c769:	mov    eax,DWORD PTR [rbp-0x284]
+=&gt; 0x55555555c796:	movsxd rsi,eax            //rsi =i
+=&gt; 0x55555555c7c7:	lea    rcx,[rbp-0x278]        // rcx=0
+=&gt; 0x55555555c806:	lea    rax,[rbp-0x230]        // rax=4; rbp-0x230=4
+=&gt; 0x55555555c83b:	mov    rdi,rax                 //rdi=4
+=&gt; 0x55555555c863:	call   0x555555555ca0
+=&gt; 0x555555555cac:	endbr64                                                     
+=&gt; 0x555555555cc5:	push   rbp
+=&gt; 0x555555555ce1:	mov    rbp,rsp
+=&gt; 0x555555555d02:	sub    rsp,0x30
+=&gt; 0x555555555d1e:	mov    QWORD PTR [rbp-0x18],rdi //4
+=&gt; 0x555555555d3a:	mov    QWORD PTR [rbp-0x20],rsi // i
+=&gt; 0x555555555d56:	mov    QWORD PTR [rbp-0x28],rdx // j
+=&gt; 0x555555555d72:	mov    QWORD PTR [rbp-0x30],rcx //0
+=&gt; 0x555555555d8e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555db0:	mov    rax,QWORD PTR [rax]   // rax=4
+=&gt; 0x555555555dd1:	cmp    QWORD PTR [rbp-0x20],rax 
+    → cmp operands: [rbp-0x20] = N/A, $rax = 4
+=&gt; 0x555555555df6:	jb     0x555555555e63
+=&gt; 0x555555555e6f:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555e8b:	mov    rax,QWORD PTR [rax+0x8] // rax=4
+=&gt; 0x555555555ea7:	cmp    QWORD PTR [rbp-0x28],rax /// cmp counter, 4
+    → cmp operands: [rbp-0x28] = N/A, $rax = 4
+=&gt; 0x555555555ecc:	jb     0x555555555f39
+=&gt; 0x555555555f45:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x555555555f61:	mov    rax,QWORD PTR [rax+0x8]    //rax=4
+=&gt; 0x555555555f84:	imul   rax,QWORD PTR [rbp-0x20] 
+=&gt; 0x555555555fae:	mov    rdx,rax                    // rdx=4*i
+=&gt; 0x555555555fcf:	mov    rax,QWORD PTR [rbp-0x28]
+=&gt; 0x555555555ff1:	add    rax,rdx                         // rax=4*i+j
+=&gt; 0x555555556012:	mov    QWORD PTR [rbp-0x8],rax   // QWORD PTR [rbp-0x8]=4*i+j= k
+=&gt; 0x55555555602e:	mov    rax,QWORD PTR [rbp-0x18]
+=&gt; 0x55555555604a:	mov    rdx,QWORD PTR [rax+0x10]  
+=&gt; 0x555555556066:	mov    rax,QWORD PTR [rbp-0x8]
+=&gt; 0x555555556082:	shl    rax,0x3                     
+=&gt; 0x5555555560a4:	add    rax,rdx                  
+=&gt; 0x5555555560cb:	mov    rdx,QWORD PTR [rax]       
+=&gt; 0x5555555560ec:	mov    rax,QWORD PTR [rbp-0x30] 
+=&gt; 0x55555555610e:	mov    QWORD PTR [rax],rdx      
+=&gt; 0x555555556136:	mov    eax,0x1
+=&gt; 0x555555556157:	leave
+=&gt; 0x555555556161:	ret
+......
+</code></pre><p>Đọc tiếp trong file log.txt, chương trình sau khi nhân ma trận sẽ xử lý duyệt qua trận trận thu được và kiểm tra xem liệu với các giá trị có index hàng bằng index cột thì có bằng 1 hay không, với các giá trị còn lại có bằng 0 hay không. Nói cách khác, chương trình so sánh ma trận thu được sau phép nhân với ma trận đơn vị. Mình rút gọn lại logic của đoạn này như sau:</p>
+<pre tabindex="0"><code>
+=&gt; 0x55555555c8f0:	jne    0x55555555caa5
+ZF=0   {
+=&gt; 0x55555555cac1:	movzx  edx,BYTE PTR [rbp-0x295]
+=&gt; 0x55555555cb00:	mov    rax,QWORD PTR [rbp-0x278]
+=&gt; 0x55555555cb35:	test   rax,rax
+=&gt; 0x55555555cb5c:	sete   al
+=&gt; 0x55555555cb83:	movzx  eax,al
+=&gt; 0x55555555cba3:	and    eax,edx
+=&gt; 0x55555555cbbb:	test   eax,eax
+=&gt; 0x55555555cbda:	setne  al
+=&gt; 0x55555555cc04:	mov    BYTE PTR [rbp-0x295],al  
+										}
+}
+
+ZF !=0 {
+=&gt; 0x55555555c927:	movzx  edx,BYTE PTR [rbp-0x295]       
+=&gt; 0x55555555c966:	mov    rax,QWORD PTR [rbp-0x278]    
+=&gt; 0x55555555c995:	cmp    rax,0x1                            
+    → cmp operands: $rax = -600, 0x1 = 1             
+=&gt; 0x55555555c9b7:	sete   al          // al=0
+=&gt; 0x55555555c9de:	movzx  eax,al
+=&gt; 0x55555555c9fe:	and    eax,edx         // eax=0
+=&gt; 0x55555555ca16:	test   eax,eax      
+=&gt; 0x55555555ca35:	setne  al         // al=1
+=&gt; 0x55555555ca5f:	mov    BYTE PTR [rbp-0x295],al ///   BYTE PTR [rbp-0x295] =1
+}
+</code></pre><p>Đến lúc này, chúng ta đã nhìn ra vấn đề: Input của chúng ta sẽ được xử lý bỏ ký tự &lsquo;-&rsquo;, thực hiện biến đổi như trên rồi tải vào ma trận, nhân ma trận với một ma trận cho sẵn rồi so sánh với ma trận đơn vị. Việc cuối cùng mình cần làm là tìm ma trận cho sẵn. Debug lại và dễ dàng tìm được ma trận được chương trình tạo sẵn để nhân:</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png, http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png 1.5x, http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png"
+        title="http://note.bksec.vn/pad/uploads/add53729-a2d4-4c6f-8247-b7a1638594c0.png" /></p>
+<p>Như vậy input phải thỏa mãn là ma trận nghịch đảo của ma trận này. Mình tìm ma trận nghịch đảo, truy ngược về password và nhập lại thì mình tìm được flag.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png"
+        data-srcset="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png, http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png 1.5x, http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png 2x"
+        data-sizes="auto"
+        alt="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png"
+        title="http://note.bksec.vn/pad/uploads/6570648b-d2cb-43b0-9571-8dab40752027.png" /></p>
+<h3 id="3-script">3. Script</h3>
+<pre tabindex="0"><code>import numpy as np
+
+A = np.array([
+    [88, -17, 19, -57],
+    [45, -9, 10, -29],
+    [-56, 11, -12, 36],
+    [-40, 8, -9, 26]
+])
+
+
+A_inv = np.linalg.inv(A)
+
+
+res_rows = []
+for i, row in enumerate(A_inv):
+    row_chars = []
+    for j, val in enumerate(row):
+        ascii_code = int(round(val + i * j + 0x41))
+        row_chars.append(chr(ascii_code))
+    res_rows.append(&#39;&#39;.join(row_chars))
+res = &#39;-&#39;.join(res_rows)
+
+print(res)
+</code></pre><h3 id="4-another-approach">4. Another approach</h3>
+<p>Sau khi mình đọc writeup chính thức, có vẻ như có hẳn một script để deobfuscating file này, và dùng IDA decompile được luôn :(. Việc này sẽ giúp công việc phân tích dễ hơn rất nhiều lần ( so với ngồi đọc full asm như mình ). Mình sẽ để script bên dưới cho mọi người dùng ( hy vọng mọi người dùng nó thay vì cố đọc hết code asm sinh ra từ script trên kia). Còn lại logic của chương trình về cơ bản vấn giống bên trên mình đã trình bày.</p>
+<pre tabindex="0"><code>from pwn import *
+import capstone
+import sys
+import ctypes
+
+def xor(a, b):
+    return bytes([a ^ b for a, b in zip(a, b)])
+
+def disas_single(data):
+    disas = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+    inst = next(disas.disasm(data, 0))
+    return inst, inst.size, inst.mnemonic
+
+def deobufscate(elf, code, text_off, text_end, addr, modified):
+    stop = False
+    while not stop:
+        inst, sz, mneumonic = disas_single(code[addr:])
+        if mneumonic == &#39;ret&#39;:
+            stop = True
+        elif mneumonic == &#39;call&#39;:
+            call_dst = addr + ctypes.c_int64(int(inst.op_str, 16)).value
+            if call_dst &gt;= text_off and call_dst &lt;= text_end:
+                deobufscate(elf, code, text_off, text_end, call_dst, modified)
+        elif mneumonic == &#39;xor&#39;:
+            if &#39;[rip + &#39; in inst.op_str:
+                rip_rel = int(inst.op_str.split(&#39;[rip + &#39;)[1].split(&#39;]&#39;)[0], 16)
+                key = int(inst.op_str.split(&#39;,&#39;)[1], 16)
+                decrypt = b&#39;&#39;
+                if inst.op_str.startswith(&#39;qword ptr &#39;):
+                    decrypt = xor(p64(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 8])
+                elif inst.op_str.startswith(&#39;dword ptr &#39;):
+                    decrypt = xor(p32(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 4])
+                elif inst.op_str.startswith(&#39;word ptr &#39;):
+                    decrypt = xor(p16(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 2])
+                elif inst.op_str.startswith(&#39;byte ptr &#39;):
+                    decrypt = xor(p8(key), code[addr + sz + rip_rel: addr + sz + rip_rel + 1])
+                assert(len(decrypt) in [1, 2, 4, 8])
+                for i, b in enumerate(decrypt):
+                    modified[addr + sz + rip_rel + i] = b
+                for i in range(addr, addr + sz):
+                    modified[i] = 0x90
+                if code[addr - 0x1] == 0x9c:
+                    modified[addr - 0x1] = 0x90
+                if code[addr + sz] == 0x9d:
+                    modified[addr + sz] = 0x90
+            elif &#39;[rip -&#39; in inst.op_str:
+                for i in range(addr, addr + sz):
+                    modified[i] = 0x90
+                if code[addr - 0x1] == 0x9c:
+                    modified[addr - 0x1] = 0x90
+                if code[addr + sz] == 0x9d:
+                    modified[addr + sz] = 0x90
+            code = bytes(modified)
+        addr += sz
+
+
+if __name__ == &#39;__main__&#39;:
+    if len(sys.argv) != 3:
+        print(f&#39;{sys.argv[0]} obfuscated main_offset&#39;)
+        exit(1)
+    elf = ELF(sys.argv[1])
+    main = int(sys.argv[2], 16)
+    text_off = elf.get_section_by_name(&#39;.text&#39;).header.sh_offset
+    text_end = elf.get_section_by_name(&#39;.text&#39;).header.sh_offset + elf.get_section_by_name(&#39;.text&#39;).header.sh_size
+    sz = text_off + text_end
+    with open(elf.path, &#39;rb&#39;) as f:
+        full = f.read()
+    data = full[:sz]
+    modified = bytearray(data)
+    deobufscate(elf, data, text_off, text_end, main, modified)
+    with open(f&#39;{elf.path}_deobfuscate&#39;, &#39;wb&#39;) as f:
+        f.write(bytes(modified) + full[sz:])
+</code></pre></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-04-16</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/htb/" data-title="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/htb/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/htb/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/htb/" data-title="Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/htb/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/utctf/" class="prev" rel="prev" title="UTCTF 2025"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>UTCTF 2025</a>
+            <a href="/posts/breach/" class="next" rel="next" title="Breach CTF 2025">Breach CTF 2025<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.5.3/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/typeit@8.6.0/dist/index.umd.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/copy-tex.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":80},"comment":{"valine":{"appId":"your-leancloud-appId","appKey":"your-leancloud-appKey","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@15.1.2/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"en","pageSize":10,"placeholder":"Comment...","recordIP":false,"visitor":true}},"data":{"id-1":"Cr0nica1","id-2":"Cr0nica1"},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":true,"left":"$$","right":"$$"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"},{"display":false,"left":"$","right":"$"}],"strict":false},"search":{"highlightTag":"em","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.bfc24322c1c736fc87270bfd02b29a3f1ec4316ce28d843a95e7f86122d3014725629b2cbba45f999fae1ec040433cefdf4a20bf2bf2aae4698cb1e66eafeb42.js" integrity="sha512-v8JDIsHHNvyHJwv9ArKaPx7EMWzijYQ6lef4YSLTAUclYpssu6RfmZ+uHsBAQzzv30ogvyvyquRpjLHmbq/rQg=="></script></body>
+</html>
