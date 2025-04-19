@@ -98,6 +98,25 @@
         alt="/images/avt.jpg"
         title="/images/avt.jpg" /></div><h1 class="home-title">Wellcome Hackers</h1><div class="home-subtitle"><div id="id-3" class="typeit"></div></div><div class="links"><a href="https://github.com/cr0nica1" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github fa-fw" aria-hidden="true"></i></a><a href="https://linkedin.com/in/minh-ho%c3%a0ng-ti%e1%ba%bfn" title="LinkedIn" target="_blank" rel="noopener noreffer me"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="mailto:minhtoanlamson2005@gmail.com" title="Email" rel="me"><i class="far fa-envelope fa-fw" aria-hidden="true"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw" aria-hidden="true"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/posts/sever-side/">Sever-Side Vulnerabilities</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-19">2025-04-19</time></span></div><div class="content"><h1 id="common-server-side-vulnerabilities">Common Server-side Vulnerabilities</h1>
+<p>This post is summary about my knowledge in server-side vulnerabilities from many resources, especially web security academy. It also has some efficient payload in common case of these vunerabilities</p>
+<h2 id="sql-injection">SQL injection</h2>
+<h3 id="1-sql-injection-special-cases">1. SQL injection special cases</h3>
+<ul>
+<li>Retrieving hidden data</li>
+<li>Subverting application logic</li>
+<li>Retrieving data from other tables</li>
+<li>Examining the database</li>
+<li>Blind SQL injection</li>
+<li>Second-order SQL injection</li>
+</ul>
+<h3 id="2-examining-the-database">2. Examining the database</h3>
+<p><strong>Querying the database type and version</strong></p>
+<p>You can potentially identify both the database type and version by injecting provider-specific queries to see if one works
+The following are some queries to determine the database version for some popular database types:</p></div><div class="post-footer">
+        <a href="/posts/sever-side/">Read More</a></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/posts/dhweb/">Dreamhack Web Wargame</a>
     </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Sau một thời gian dài cùng với các mảng CTF về ngôn ngữ low-level, mình nghĩ rằng đã đến lúc mình cần một cái gì đó mới mẻ hơn, offensive hơn và web là lựa chọn đó. Ở đây mình sẽ chỉ sưu tầm những chall mình đánh giá là hay, có thể nó không khó nhưng bổ sung cho mình nhiều điều mới mẻ.</p>
 <h2 id="ez_command_injection">EZ_command_injection</h2>
@@ -146,14 +165,6 @@
 <h3 id="1-analysis">1. Analysis</h3>
 <p>Chall cho biết file mã nguồn của chương trình xác thực trên server. Cần phải nhập chính xác số cần nhập để sau các phép biến đổi, kết quả sẽ bằng kết quả trong output.txt. Logic chương trình khá đơn giản, chỉ là vòng lặp sau.</p></div><div class="post-footer">
         <a href="/posts/breach/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/htb/">Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.</p>
-<h1 id="writeup">Writeup</h1>
-<h2 id="singlestep---rev">Singlestep - rev</h2>
-<h3 id="1-static-analysis">1. Static Analysis</h3>
-<p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p></div><div class="post-footer">
-        <a href="/posts/htb/">Read More</a></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
                         <a href="/">1</a>

