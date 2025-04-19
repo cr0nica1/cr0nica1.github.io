@@ -280,7 +280,7 @@ Mình không chắc chắn cách server xử lý nên để chắc ăn mình s�
         alt="/images/dhweb8.png"
         title="alt text" /></p>
 <p>Lấy được 1 giá trị trong cột là &lsquo;adm1ngnngn&rsquo;, có vẻ là 1 giá trị mình cần tìm vì có liên quan đến admin.</p>
-<p>Tuy nhiên thì do chỉ in ra giá trị $id_column trong query nên chúng ta không thể leak các cột $pw_column bằng UNION-based thông thường.</p>
+<p>Tuy nhiên thì do chỉ in ra giá trị <code>$id_column</code> trong query nên chúng ta không thể leak các cột <code>$pw_column</code> bằng UNION-based thông thường.</p>
 <p>Chúng ta nhìn lại logic lấy query.</p>
 <pre tabindex="0"><code>$query = mysql_fetch_array(mysql_query(&#34;SELECT * FROM findflag_2 WHERE $id_column=&#39;{$id}&#39; and $pw_column=&#39;{$pw}&#39;;&#34;));
 </code></pre><p>và</p>
@@ -319,7 +319,7 @@ Mình không chắc chắn cách server xử lý nên để chắc ăn mình s�
         data-sizes="auto"
         alt="/images/dhweb11.png"
         title="alt text" /></p>
-<p>Response trả về cho thấy id và pw đã đúng. Điều tiếp theo mình cần tìm là flag. Flag được lưu trong hẳn 1 column tên là flag_column. Do vậy mình vẫn cần dựa vào truy vấn để tìm flag. Trước tiên thì chúng ta vẫn không biết chính xác tên cột flag để gọi truy vấn, tuy nhiên truy vấn gốc cho ta biết rằng có 5 cột nên mình sẽ thay phiên dump giá trị 5 cột đó ra. Ý tưởng sẽ là tạo một bảng ảo bằng subquery với dòng đầu tiên là ảo, dòng thứ 2 sẽ là giá trị dump từ findflag_2. Thử query tất cả các vị trí của bảng ảo này thì mình tìm thấy được <code>$flag_column</code> nằm ở cột 4. Như vậy mình chỉ cần lấy giá trị truy vấn dòng thứ 2 của bảng ảo cột 4:</p>
+<p>Response trả về cho thấy id và pw đã đúng. Điều tiếp theo mình cần tìm là flag. Flag được lưu trong hẳn 1 column tên là flag_column. Do vậy mình vẫn cần dựa vào truy vấn để tìm flag. Trước tiên thì chúng ta vẫn không biết chính xác tên cột flag để gọi truy vấn, tuy nhiên truy vấn gốc cho ta biết rằng có 5 cột nên mình sẽ thay phiên dump giá trị 5 cột đó ra. Ý tưởng sẽ là tạo một bảng ảo bằng subquery với dòng đầu tiên là ảo, dòng thứ 2 sẽ là giá trị dump từ <code>findflag_2</code>. Thử query tất cả các vị trí của bảng ảo này thì mình tìm thấy được <code>$flag_column</code> nằm ở cột 4. Như vậy mình chỉ cần lấy giá trị truy vấn dòng thứ 2 của bảng ảo cột 4:</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
