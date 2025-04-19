@@ -35,8 +35,8 @@ The following are some queries to determine the database version for some popula
 <p>Most database types (except Oracle) have a set of views called the information schema.
 With Oracle database, <code>all_tables</code> and <code>all_tab_columns</code> instead.</p>
 <h3 id="3-sql-injection-technique-union-attacks">3. SQL injection technique: UNION attacks</h3>
-<p><strong>Determining the numbers of columns</strong>
-When you perform a SQL injection UNION attack, there are two effective methods to determine how many columns are being returned from the original query.One method involves injecting a series of ORDER BY clauses and incrementing the specified column index until an error occurs:</p>
+<p><strong>Determining the numbers of columns</strong></p>
+<p>When you perform a SQL injection UNION attack, there are two effective methods to determine how many columns are being returned from the original query.One method involves injecting a series of ORDER BY clauses and incrementing the specified column index until an error occurs:</p>
 <pre tabindex="0"><code>&#39; ORDER BY 1--
 &#39; ORDER BY 2--
 &#39; ORDER BY 3--
@@ -47,8 +47,8 @@ etc.
 &#39; UNION SELECT NULL,NULL,NULL--
 etc.
 </code></pre><p><strong>note</strong>: specific syntax on Oracle:<code>' UNION SELECT NULL FROM DUAL--</code></p>
-<p><strong>Finding columns with a useful data type</strong>
-After you determine the number of required columns, you can probe each column to test whether it can hold string data. You can submit a series of UNION SELECT payloads that place a string value into each column in turn.</p>
+<p><strong>Finding columns with a useful data type</strong></p>
+<p>After you determine the number of required columns, you can probe each column to test whether it can hold string data. You can submit a series of UNION SELECT payloads that place a string value into each column in turn.</p>
 <pre tabindex="0"><code>&#39; UNION SELECT &#39;a&#39;,NULL,NULL,NULL--
 &#39; UNION SELECT NULL,&#39;a&#39;,NULL,NULL--
 &#39; UNION SELECT NULL,NULL,&#39;a&#39;,NULL--
@@ -78,8 +78,8 @@ xyz&#39; AND &#39;1&#39;=&#39;2
 <li>MySQL:	<code>SELECT 'foo' WHERE 1=1 AND EXTRACTVALUE(1, CONCAT(0x5c, (SELECT 'secret')))</code>
 `&gt; XPATH syntax error: &lsquo;\secret&rsquo;</li>
 </ul>
-<p><strong>Triggering time delays</strong>
-If the application catches database errors when the SQL query is executed and handles them gracefully, there won&rsquo;t be any difference in the application&rsquo;s response. This means the previous technique for inducing conditional errors will not work.</p>
+<p><strong>Triggering time delays</strong></p>
+<p>If the application catches database errors when the SQL query is executed and handles them gracefully, there won&rsquo;t be any difference in the application&rsquo;s response. This means the previous technique for inducing conditional errors will not work.</p>
 <p>In this situation, it is often possible to exploit the blind SQL injection vulnerability by triggering time delays depending on whether an injected condition is true or false. As SQL queries are normally processed synchronously by the application, delaying the execution of a SQL query also delays the HTTP response. This allows you to determine the truth of the injected condition based on the time taken to receive the HTTP response.
 Payload:</p>
 <ul>
