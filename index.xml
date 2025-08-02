@@ -7,12 +7,12 @@
             <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</lastBuildDate>
             <atom:link href="https://cr0nica1.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
-    <title>Research: Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</title>
+    <title>Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</title>
     <link>https://cr0nica1.github.io/posts/cve_2022_24355/</link>
     <pubDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</pubDate>
     <author>cr0nica1</author>
     <guid>https://cr0nica1.github.io/posts/cve_2022_24355/</guid>
-    <description><![CDATA[<h2 id="about-tp-link-tl-wr940n-and-the-vulnerabilities">About TP-Link TL-WR940N and the vulnerabilities</h2>
+    <description><![CDATA[<h2 id="about-tp-link-tl-wr940n-and-the-vulnerability">About TP-Link TL-WR940N and the vulnerability</h2>
 <p></p>
 <p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
 CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p>
