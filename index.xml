@@ -41,7 +41,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
 <p>From checksec result, the program do not have any mitigation. In some blogs, they said that the router’s ASLR is disable. So we can easily get the libc base address to build ROP gagdget. I will overwrite the return address to a ROP chain, then redirecting to a shellcode.</p>
 <p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyze and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode has many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
 <p></p>
-<p>I obfuscate my shellcode with xor.encoded from pwntools, but it still has a illegal byte.</p>
+<p>I obfuscate my shellcode with xor.encoded from pwntools, but it still has an illegal byte.</p>
 <p></p>
 <p>After finding on internet, i see that we can change all <code>$t6</code> in shellcode to <code>$t1</code>, because the shellcode and rop chain do not using this register and  <code>$t1</code> register has the same purpose with <code>$t6</code>.</p>
 <p></p>
