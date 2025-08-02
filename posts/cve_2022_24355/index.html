@@ -120,6 +120,14 @@
   </ul>
 </nav></div>
             </div><div class="content" id="content"><h2 id="about-tp-link-tl-wr940n-and-the-vulnerabilities">About TP-Link TL-WR940N and the vulnerabilities</h2>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/cve_2022_24355/picin.jpg"
+        data-srcset="/cve_2022_24355/picin.jpg, /cve_2022_24355/picin.jpg 1.5x, /cve_2022_24355/picin.jpg 2x"
+        data-sizes="auto"
+        alt="/cve_2022_24355/picin.jpg"
+        title="/cve_2022_24355/picin.jpg" /></p>
 <p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
 CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p>
 <h2 id="analyzing-the-vulnerability">Analyzing the vulnerability</h2>
