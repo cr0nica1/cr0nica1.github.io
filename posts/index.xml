@@ -4,7 +4,50 @@
         <link>https://cr0nica1.github.io/posts/</link>
         <description>All Posts | Cr0nica1</description>
         <generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>minhtoanlamson2005@gmail.com (cr0nica1)</managingEditor>
-            <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Mon, 05 May 2025 00:12:29 &#43;0700</lastBuildDate><atom:link href="https://cr0nica1.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</lastBuildDate><atom:link href="https://cr0nica1.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Research: Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</title>
+    <link>https://cr0nica1.github.io/posts/cve_2022_24355/</link>
+    <pubDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</pubDate>
+    <author>cr0nica1</author>
+    <guid>https://cr0nica1.github.io/posts/cve_2022_24355/</guid>
+    <description><![CDATA[<h2 id="about-tp-link-tl-wr940n-and-the-vulnerabilities">About TP-Link TL-WR940N and the vulnerabilities</h2>
+<p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
+CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p>
+<h2 id="analyzing-the-vulnerability">Analyzing the vulnerability</h2>
+<p>In this article, i use the TL-WR940N v4 firmware version 160617 to reproducing the exploitation of this vulnerability.</p>
+<p></p>
+<p>From main function, httpd() function is called to initializing http service. This function deploys all the endpoint of http service like &lsquo;/&rsquo; , &lsquo;/userRpm/LoginRpm.htm&rsquo;, &lsquo;/help/&rsquo;,&hellip;. User must access the &lsquo;/fs/&rsquo; and &lsquo;/loginFs/&rsquo; endpoint to make the program calling httpRpmFs() function.</p>
+<p></p>
+<p>The Referer of request also must be equal to the host ip to pass the security check in httpDispatcher().</p>
+<p></p>
+<p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if this file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
+<p></p>
+<p>Well, it look good and does not seem vulnerable. After long time analyzing this pseudocode, i find and read blogs about analyzing this vulnerability (which i add to references). They said that it is vulnerable on reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability so i analyzing it to proof that it is vulnerable on reading file in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
+<p></p>
+<p>A security check in firmware 211111 prevents us reading file in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, i try to read &lsquo;/tmp/passwd&rsquo;.</p>
+<p></p>
+<p></p>
+<p>I attach debugger to see why it crash and see that a part of request was written on stack and cause overflow.</p>
+<p></p>
+<p>The Return address value is overwritten by &lsquo;3456&rsquo; which is from &ldquo;cookie: authorization: 123456&rdquo; of the request. A part of request overwrite return address then causing httpd crashed.</p>
+<p>Go back with httpRpmFs(), the program will make a response contain the content of the file we want to read in &lsquo;/tmp/&rsquo; folder after reading that file. Ensuring that the &lsquo;Content-Type&rsquo; of response will match with file name extension of that file, sub_506790() is called to detect.</p>
+<p></p>
+<p>This function create a pointer which pointing to the end of file path. Then, then pointer move backward to find the &lsquo;.&rsquo; character, and copying the part of string after &lsquo;.&rsquo; character. The program think that all content after &lsquo;.&rsquo; is file extension. But in this case, &lsquo;/tmp/&rsquo; folder has file &lsquo;passwd&rsquo;, which do not have file extension. The pointer will move until it find the first &lsquo;.&rsquo; character: the &lsquo;.&rsquo; in its ip address in the referrer header. All character after this &lsquo;.&rsquo; are pushed to the stack. Then, the stack is overwritten. The return address value on stack is overwritten too, so the program crash.</p>
+<h2 id="reproducing-the-exploitation">Reproducing the exploitation</h2>
+<p></p>
+<p>From checksec result, the program do not have any mitigation. In some blogs, they said that the router’s ASLR is disable. So we can easily get the libc base address to build ROP gagdget. I will overwrite the return address to a ROP chain, then redirecting to a shellcode.</p>
+<p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyzing and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode having any byte in the range from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
+<p></p>
+<p>I obfuscates my shellcode with xor.encoded from pwntools, but it still has a illegal bytes.</p>
+<p></p>
+<p>After finding on internet, i see that we can change all &lsquo;$t6&rsquo; in shellcode to &lsquo;$t1&rsquo;, because the shellcode and rop chain do not using this register and  $t1 register has the same purpose with $t6.</p>
+<p></p>
+<p>And finally, i craft my payload and receive a reverse shell from router.</p>
+<p></p>
+<p></p>
+]]></description>
+</item>
+<item>
     <title>Dreamhack CTF Season 7 Round #5 (🚩Div1)</title>
     <link>https://cr0nica1.github.io/posts/dhctf%237r5/</link>
     <pubDate>Wed, 16 Apr 2025 03:57:40 &#43;0700</pubDate>

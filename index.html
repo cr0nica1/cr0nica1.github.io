@@ -98,6 +98,12 @@
         alt="/images/avt.jpg"
         title="/images/avt.jpg" /></div><h1 class="home-title">Wellcome Hackers</h1><div class="home-subtitle"><div id="id-3" class="typeit"></div></div><div class="links"><a href="https://github.com/cr0nica1" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github fa-fw" aria-hidden="true"></i></a><a href="https://linkedin.com/in/minh-ho%c3%a0ng-ti%e1%ba%bfn" title="LinkedIn" target="_blank" rel="noopener noreffer me"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="mailto:minhtoanlamson2005@gmail.com" title="Email" rel="me"><i class="far fa-envelope fa-fw" aria-hidden="true"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw" aria-hidden="true"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/posts/cve_2022_24355/">Research: Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-08-02">2025-08-02</time></span></div><div class="content"><h2 id="about-tp-link-tl-wr940n-and-the-vulnerabilities">About TP-Link TL-WR940N and the vulnerabilities</h2>
+<p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
+CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p></div><div class="post-footer">
+        <a href="/posts/cve_2022_24355/">Read More</a></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/posts/dhctf%237r5/">Dreamhack CTF Season 7 Round #5 (🚩Div1)</a>
     </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Giải này diễn ra tình cờ vào thời điểm mình vừa xong đợt trainning CTF nên có thời gian rảnh thử sức. Tuy nhiên bằng một cách thần kỳ nào đó mình lỡ bài rev khá tiếc mà giải được câu pwn này.</p>
 <h2 id="chat-with-me---binary-exploitation">Chat with Me - Binary exploitation</h2>
@@ -147,22 +153,6 @@
 <h3 id="1-static-analysis">1. Static Analysis</h3>
 <p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p></div><div class="post-footer">
         <a href="/posts/htb/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/utctf/">UTCTF 2025</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.</p>
-<h2 id="ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</h2>
-<h3 id="1-analysis">1. Analysis</h3>
-<p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/utctf/i1.png"
-        data-srcset="/utctf/i1.png, /utctf/i1.png 1.5x, /utctf/i1.png 2x"
-        data-sizes="auto"
-        alt="/utctf/i1.png"
-        title="alt text" /></p>
-<p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p></div><div class="post-footer">
-        <a href="/posts/utctf/">Read More</a></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
                         <a href="/">1</a>

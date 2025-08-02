@@ -98,6 +98,22 @@
         alt="/images/avt.jpg"
         title="/images/avt.jpg" /></div><h1 class="home-title">Wellcome Hackers</h1><div class="home-subtitle"><div id="id-3" class="typeit"></div></div><div class="links"><a href="https://github.com/cr0nica1" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github fa-fw" aria-hidden="true"></i></a><a href="https://linkedin.com/in/minh-ho%c3%a0ng-ti%e1%ba%bfn" title="LinkedIn" target="_blank" rel="noopener noreffer me"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="mailto:minhtoanlamson2005@gmail.com" title="Email" rel="me"><i class="far fa-envelope fa-fw" aria-hidden="true"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw" aria-hidden="true"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/posts/utctf/">UTCTF 2025</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Giải này mình tham gia song song với K!nd4SUS CTF 2025 nên không có giải được nhiều. Tuy nhiên mình vẫn có 1 chall dễ rev và 1 chall pwn.</p>
+<h2 id="ostrich-algorithm---reverse-engineering">Ostrich Algorithm - reverse engineering</h2>
+<h3 id="1-analysis">1. Analysis</h3>
+<p>Sử dụng IDA pro mở file thì ở hàm start mình nhìn thấy được đoạn mã giả như sau:</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/utctf/i1.png"
+        data-srcset="/utctf/i1.png, /utctf/i1.png 1.5x, /utctf/i1.png 2x"
+        data-sizes="auto"
+        alt="/utctf/i1.png"
+        title="alt text" /></p>
+<p>Do chương trình này Statically linked, cộng với các tham số truyền vào hàm sub_404000 nên mình đoán có vẻ đây là 1 hàm giống _libc_start_main. Đọc kỹ hơn bên trong thì mình gần như chắc chắn điều đó, do vậy có vẻ hàm Sub_401775 sẽ là hàm main.</p></div><div class="post-footer">
+        <a href="/posts/utctf/">Read More</a></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/posts/intro/">K!nd4SUS CTF 2025</a>
     </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Đây là giải CTF đầu tiên của mình với CLB BKSEC, tuy vẫn chưa có nhiều kinh nghiệm nhưng mình cũng học hỏi khá nhiều điều từ 2 challenge mình giải được.</p>
 <h2 id="i-the-kindling-of-the-first-flag---reverse-engineering">I. The kindling of the first Flag - reverse engineering</h2>
