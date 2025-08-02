@@ -23,7 +23,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
 <p></p>
 <p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if this file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
 <p></p>
-<p>Well, it look good and does not seem vulnerable. After long time analyzing this pseudocode, i find and read blogs about analyzing this vulnerability (which i add to references). They said that it is vulnerable on reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability so i analyzing it to proof that it is vulnerable on reading file in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
+<p>Well, it looks good and does not seem vulnerable.I find and read blogs about analyzing this vulnerability (which i add to references). They said that it is vulnerable on reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability so i analyzing it to proof that it is vulnerable on reading file in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
 <p></p>
 <p>A security check in firmware 211111 prevents us reading file in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, i try to read &lsquo;/tmp/passwd&rsquo;.</p>
 <p></p>
