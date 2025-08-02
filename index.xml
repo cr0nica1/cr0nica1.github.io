@@ -48,6 +48,12 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
 <p>And finally, i craft my payload and receive a reverse shell from router.</p>
 <p></p>
 <p></p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://blog.viettelcybersecurity.com/tp-link-tl-wr940n-httpd-httprpmfs-stack-based-buffer-overflow-remote-code-execution-vulnerability/" target="_blank" rel="noopener noreffer ">https://blog.viettelcybersecurity.com/tp-link-tl-wr940n-httpd-httprpmfs-stack-based-buffer-overflow-remote-code-execution-vulnerability/</a></li>
+<li><a href="https://flex0geek.blogspot.com/2024/04/debugexploit-cve-2022-24355-tp-link-tl.html" target="_blank" rel="noopener noreffer ">https://flex0geek.blogspot.com/2024/04/debugexploit-cve-2022-24355-tp-link-tl.html</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/581866861" target="_blank" rel="noopener noreffer ">https://zhuanlan.zhihu.com/p/581866861</a></li>
+</ul>
 ]]></description>
 </item>
 <item>
