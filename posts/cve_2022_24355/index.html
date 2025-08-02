@@ -29,7 +29,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/cr0nica1.github.io\/posts\/cve_2022_24355\/"
-        },"genre": "posts","wordcount":  682 ,
+        },"genre": "posts","wordcount":  679 ,
         "url": "https:\/\/cr0nica1.github.io\/posts\/cve_2022_24355\/","datePublished": "2025-08-02T20:56:05+07:00","dateModified": "2025-08-02T20:56:05+07:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -103,7 +103,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-08-02">2025-08-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;682 words&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-08-02">2025-08-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;679 words&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;<span id="/posts/cve_2022_24355/" class="leancloud_visitors" data-flag-title="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
                         <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
                     </span>&nbsp;</div>
@@ -223,7 +223,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         alt="/cve_2022_24355/pic10.png"
         title="/cve_2022_24355/pic10.png" /></p>
 <p>From checksec result, the program do not have any mitigation. In some blogs, they said that the router’s ASLR is disable. So we can easily get the libc base address to build ROP gagdget. I will overwrite the return address to a ROP chain, then redirecting to a shellcode.</p>
-<p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyzing and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode having any byte in the range from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
+<p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyzing and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode having many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
