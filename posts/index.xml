@@ -13,37 +13,37 @@
     <description><![CDATA[<h2 id="about-tp-link-tl-wr940n-and-the-vulnerability">About TP-Link TL-WR940N and the vulnerability</h2>
 <p></p>
 <p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
-CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p>
+CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.</p>
 <h2 id="analyzing-the-vulnerability">Analyzing the vulnerability</h2>
 <p>In this article, i use the TL-WR940N v4 firmware version 160617 to reproducing the exploitation of this vulnerability.</p>
 <p></p>
-<p>From main function, httpd() function is called to initializing http service. This function deploys all the endpoint of http service like &lsquo;/&rsquo; , &lsquo;/userRpm/LoginRpm.htm&rsquo;, &lsquo;/help/&rsquo;,&hellip;. User must access the &lsquo;/fs/&rsquo; and &lsquo;/loginFs/&rsquo; endpoint to make the program calling httpRpmFs() function.</p>
+<p>From main() function, httpd() function is called to initialize http service. This function deploys all the endpoints of the HTTP service like &lsquo;/&rsquo; , &lsquo;/userRpm/LoginRpm.htm&rsquo;, &lsquo;/help/&rsquo;,&hellip;. User must access the &lsquo;/fs/&rsquo; and &lsquo;/loginFs/&rsquo; endpoint to make the program call the httpRpmFs() function.</p>
 <p></p>
 <p>The Referer of request also must be equal to the host ip to pass the security check in httpDispatcher().</p>
 <p></p>
-<p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if this file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
+<p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if the file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
 <p></p>
-<p>Well, it looks good and does not seem vulnerable.I find and read blogs about analyzing this vulnerability (which i add to references). They said that it is vulnerable on reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability so i analyzing it to proof that it is vulnerable on reading file in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
+<p>Well, it looks good and does not seem vulnerable. I find and read blogs about analyzing this vulnerability (which I add to references). They said that it is vulnerable to reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability, so I am analyzing it to prove that it is vulnerable to reading files in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
 <p></p>
-<p>A security check in firmware 211111 prevents us reading file in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, i try to read &lsquo;/tmp/passwd&rsquo;.</p>
+<p>A security check in firmware 211111 prevents us from reading files in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, I try to read &lsquo;/tmp/passwd&rsquo;.</p>
 <p></p>
 <p></p>
-<p>I attach debugger to see why it crash and see that a part of request was written on stack and cause overflow.</p>
+<p>I attached a debugger to see why it crashed and saw that a part of the request was written on the stack and caused overflow.</p>
 <p></p>
-<p>The Return address value is overwritten by &lsquo;3456&rsquo; which is from &ldquo;cookie: authorization: 123456&rdquo; of the request. A part of request overwrite return address then causing httpd crashed.</p>
-<p>Go back with httpRpmFs(), the program will make a response contain the content of the file we want to read in &lsquo;/tmp/&rsquo; folder after reading that file. Ensuring that the &lsquo;Content-Type&rsquo; of response will match with file name extension of that file, sub_506790() is called to detect.</p>
+<p>The Return address value is overwritten by &lsquo;3456&rsquo;, which is from &ldquo;cookie: authorization: 123456&rdquo; of the request. A part of the request overwrites the return address, then causes httpd to crash.</p>
+<p>Go back with httpRpmFs(), the program will make a response containing the content of the file we want to read in &lsquo;/tmp/&rsquo; folder after reading that file. Ensuring that the &lsquo;Content-Type&rsquo; of the response will match the file name extension of that file, sub_506790() is called to detect it.</p>
 <p></p>
-<p>This function create a pointer which pointing to the end of file path. Then, then pointer move backward to find the &lsquo;.&rsquo; character, and copying the part of string after &lsquo;.&rsquo; character. The program think that all content after &lsquo;.&rsquo; is file extension. But in this case, &lsquo;/tmp/&rsquo; folder has file &lsquo;passwd&rsquo;, which do not have file extension. The pointer will move until it find the first &lsquo;.&rsquo; character: the &lsquo;.&rsquo; in its ip address in the referrer header. All character after this &lsquo;.&rsquo; are pushed to the stack. Then, the stack is overwritten. The return address value on stack is overwritten too, so the program crash.</p>
+<p>This function creates a pointer that points to the end of the file path. Then, the pointer moves backward to find the &lsquo;.&rsquo; character, and copies the part of the string after &lsquo;.&rsquo; character. The program thinks that all content after &lsquo;.&rsquo; is a file extension. But in this case, &lsquo;/tmp/&rsquo; folder has a file &lsquo;passwd&rsquo;, which does not have a file extension. The pointer will move until it finds the first &lsquo;.&rsquo; character: the &lsquo;.&rsquo; of the IP address in the Referer header. All characters after this &lsquo;.&rsquo; are pushed to the stack. Then, the stack is overwritten. The return address value on the stack is overwritten, too, so the program crashes.</p>
 <h2 id="reproducing-the-exploitation">Reproducing the exploitation</h2>
 <p></p>
-<p>From checksec result, the program do not have any mitigation. In some blogs, they said that the router’s ASLR is disable. So we can easily get the libc base address to build ROP gagdget. I will overwrite the return address to a ROP chain, then redirecting to a shellcode.</p>
-<p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyze and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode has many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
+<p>From the checksec result, the program does not have any mitigation. In some blogs, they said that the router’s ASLR is disabled. So we can easily get the libc base address to build the ROP gadget. I will overwrite the return address to a ROP chain, then redirect to a shellcode.</p>
+<p>I borrowed a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to craft the payload of my exploit code, but after sending the payload, I do not receive any connection from the router (which is a reverse shell). I reanalyze and find that the toupper() will uppercase all characters from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode has many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
 <p></p>
 <p>I obfuscate my shellcode with xor.encoded from pwntools, but it still has an illegal byte.</p>
 <p></p>
-<p>After finding on internet, i see that we can change all <code>$t6</code> in shellcode to <code>$t1</code>, because the shellcode and rop chain do not using this register and  <code>$t1</code> register has the same purpose with <code>$t6</code>.</p>
+<p>After finding on the internet, I see that we can change all <code>$t6</code> in shellcode to <code>$t1</code>, because the shellcode and rop chain do not use this register, and  <code>$t1</code> register has the same purpose as <code>$t6</code>.</p>
 <p></p>
-<p>And finally, i craft my payload and receive a reverse shell from router.</p>
+<p>And finally, I craft my payload and receive a reverse shell from the router.</p>
 <p></p>
 <p></p>
 <h2 id="references">References</h2>

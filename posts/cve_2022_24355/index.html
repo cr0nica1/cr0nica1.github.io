@@ -7,7 +7,7 @@
         <title>Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355) - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/cve_2022_24355/">
   <meta property="og:site_name" content="Cr0nica1">
   <meta property="og:title" content="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
-  <meta property="og:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.">
+  <meta property="og:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -16,7 +16,7 @@
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
-  <meta name="twitter:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.">
+  <meta name="twitter:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.">
 <meta name="application-name" content="Cr0nica1">
 <meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/cve_2022_24355/" /><link rel="prev" href="https://cr0nica1.github.io/posts/dhctf%237r5/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -29,7 +29,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/cr0nica1.github.io\/posts\/cve_2022_24355\/"
-        },"genre": "posts","wordcount":  676 ,
+        },"genre": "posts","wordcount":  704 ,
         "url": "https:\/\/cr0nica1.github.io\/posts\/cve_2022_24355\/","datePublished": "2025-08-02T20:56:05+07:00","dateModified": "2025-08-02T20:56:05+07:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -103,7 +103,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-08-02">2025-08-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;676 words&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-08-02">2025-08-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;704 words&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;<span id="/posts/cve_2022_24355/" class="leancloud_visitors" data-flag-title="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
                         <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
                     </span>&nbsp;</div>
@@ -130,7 +130,7 @@
         alt="/cve_2022_24355/picin.jpg"
         title="/cve_2022_24355/picin.jpg" /></p>
 <p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
-CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p>
+CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.</p>
 <h2 id="analyzing-the-vulnerability">Analyzing the vulnerability</h2>
 <p>In this article, i use the TL-WR940N v4 firmware version 160617 to reproducing the exploitation of this vulnerability.</p>
 <p><img
@@ -141,7 +141,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic1.png"
         title="/cve_2022_24355/pic1.png" /></p>
-<p>From main function, httpd() function is called to initializing http service. This function deploys all the endpoint of http service like &lsquo;/&rsquo; , &lsquo;/userRpm/LoginRpm.htm&rsquo;, &lsquo;/help/&rsquo;,&hellip;. User must access the &lsquo;/fs/&rsquo; and &lsquo;/loginFs/&rsquo; endpoint to make the program calling httpRpmFs() function.</p>
+<p>From main() function, httpd() function is called to initialize http service. This function deploys all the endpoints of the HTTP service like &lsquo;/&rsquo; , &lsquo;/userRpm/LoginRpm.htm&rsquo;, &lsquo;/help/&rsquo;,&hellip;. User must access the &lsquo;/fs/&rsquo; and &lsquo;/loginFs/&rsquo; endpoint to make the program call the httpRpmFs() function.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -159,7 +159,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic3.png"
         title="/cve_2022_24355/pic3.png" /></p>
-<p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if this file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
+<p>Analyzing httpRpmFs(), we easily show that this function is used to read the file content if the file name is in &lsquo;/tmp/&rsquo; or &lsquo;/web/&rsquo; folder of firmware.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -168,7 +168,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic4.png"
         title="/cve_2022_24355/pic4.png" /></p>
-<p>Well, it looks good and does not seem vulnerable.I find and read blogs about analyzing this vulnerability (which i add to references). They said that it is vulnerable on reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability so i analyzing it to proof that it is vulnerable on reading file in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
+<p>Well, it looks good and does not seem vulnerable. I find and read blogs about analyzing this vulnerability (which I add to references). They said that it is vulnerable to reading &lsquo;passwd&rsquo; in &lsquo;/tmp/&rsquo; folder. The firmware 211111 fixed this vulnerability, so I am analyzing it to prove that it is vulnerable to reading files in &lsquo;/tmp/&rsquo;, specifically &lsquo;passwd&rsquo;.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -177,7 +177,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic5.png"
         title="/cve_2022_24355/pic5.png" /></p>
-<p>A security check in firmware 211111 prevents us reading file in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, i try to read &lsquo;/tmp/passwd&rsquo;.</p>
+<p>A security check in firmware 211111 prevents us from reading files in &lsquo;/tmp/&rsquo; folder if we do not have authorized access. So, I try to read &lsquo;/tmp/passwd&rsquo;.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -194,7 +194,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic7.png"
         title="/cve_2022_24355/pic7.png" /></p>
-<p>I attach debugger to see why it crash and see that a part of request was written on stack and cause overflow.</p>
+<p>I attached a debugger to see why it crashed and saw that a part of the request was written on the stack and caused overflow.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -203,8 +203,8 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic8.png"
         title="/cve_2022_24355/pic8.png" /></p>
-<p>The Return address value is overwritten by &lsquo;3456&rsquo; which is from &ldquo;cookie: authorization: 123456&rdquo; of the request. A part of request overwrite return address then causing httpd crashed.</p>
-<p>Go back with httpRpmFs(), the program will make a response contain the content of the file we want to read in &lsquo;/tmp/&rsquo; folder after reading that file. Ensuring that the &lsquo;Content-Type&rsquo; of response will match with file name extension of that file, sub_506790() is called to detect.</p>
+<p>The Return address value is overwritten by &lsquo;3456&rsquo;, which is from &ldquo;cookie: authorization: 123456&rdquo; of the request. A part of the request overwrites the return address, then causes httpd to crash.</p>
+<p>Go back with httpRpmFs(), the program will make a response containing the content of the file we want to read in &lsquo;/tmp/&rsquo; folder after reading that file. Ensuring that the &lsquo;Content-Type&rsquo; of the response will match the file name extension of that file, sub_506790() is called to detect it.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -213,7 +213,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic9.png"
         title="/cve_2022_24355/pic9.png" /></p>
-<p>This function create a pointer which pointing to the end of file path. Then, then pointer move backward to find the &lsquo;.&rsquo; character, and copying the part of string after &lsquo;.&rsquo; character. The program think that all content after &lsquo;.&rsquo; is file extension. But in this case, &lsquo;/tmp/&rsquo; folder has file &lsquo;passwd&rsquo;, which do not have file extension. The pointer will move until it find the first &lsquo;.&rsquo; character: the &lsquo;.&rsquo; in its ip address in the referrer header. All character after this &lsquo;.&rsquo; are pushed to the stack. Then, the stack is overwritten. The return address value on stack is overwritten too, so the program crash.</p>
+<p>This function creates a pointer that points to the end of the file path. Then, the pointer moves backward to find the &lsquo;.&rsquo; character, and copies the part of the string after &lsquo;.&rsquo; character. The program thinks that all content after &lsquo;.&rsquo; is a file extension. But in this case, &lsquo;/tmp/&rsquo; folder has a file &lsquo;passwd&rsquo;, which does not have a file extension. The pointer will move until it finds the first &lsquo;.&rsquo; character: the &lsquo;.&rsquo; of the IP address in the Referer header. All characters after this &lsquo;.&rsquo; are pushed to the stack. Then, the stack is overwritten. The return address value on the stack is overwritten, too, so the program crashes.</p>
 <h2 id="reproducing-the-exploitation">Reproducing the exploitation</h2>
 <p><img
         class="lazyload"
@@ -223,8 +223,8 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic10.png"
         title="/cve_2022_24355/pic10.png" /></p>
-<p>From checksec result, the program do not have any mitigation. In some blogs, they said that the router’s ASLR is disable. So we can easily get the libc base address to build ROP gagdget. I will overwrite the return address to a ROP chain, then redirecting to a shellcode.</p>
-<p>I borrow a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to crafting the payload of my exploit code, but after send payload, i do not receive any connection from router (which is a reverse shell). I reanalyze and find that the toupper() will uppercase all character from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode has many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
+<p>From the checksec result, the program does not have any mitigation. In some blogs, they said that the router’s ASLR is disabled. So we can easily get the libc base address to build the ROP gadget. I will overwrite the return address to a ROP chain, then redirect to a shellcode.</p>
+<p>I borrowed a shellcode from (<a href="https://www.exploit-db.com/exploits/35868" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/35868</a>) and ROPgadget from (<a href="https://www.exploit-db.com/exploits/46678" target="_blank" rel="noopener noreffer ">https://www.exploit-db.com/exploits/46678</a>) to craft the payload of my exploit code, but after sending the payload, I do not receive any connection from the router (which is a reverse shell). I reanalyze and find that the toupper() will uppercase all characters from &lsquo;a&rsquo; to &lsquo;z&rsquo;. My shellcode has many bytes from &lsquo;a&rsquo; to &lsquo;z&rsquo;.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -242,7 +242,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic12.png"
         title="/cve_2022_24355/pic12.png" /></p>
-<p>After finding on internet, i see that we can change all <code>$t6</code> in shellcode to <code>$t1</code>, because the shellcode and rop chain do not using this register and  <code>$t1</code> register has the same purpose with <code>$t6</code>.</p>
+<p>After finding on the internet, I see that we can change all <code>$t6</code> in shellcode to <code>$t1</code>, because the shellcode and rop chain do not use this register, and  <code>$t1</code> register has the same purpose as <code>$t6</code>.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
@@ -251,7 +251,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         data-sizes="auto"
         alt="/cve_2022_24355/pic13.png"
         title="/cve_2022_24355/pic13.png" /></p>
-<p>And finally, i craft my payload and receive a reverse shell from router.</p>
+<p>And finally, I craft my payload and receive a reverse shell from the router.</p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"

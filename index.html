@@ -109,7 +109,7 @@
         alt="/cve_2022_24355/picin.jpg"
         title="/cve_2022_24355/picin.jpg" /></p>
 <p>The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower.
-CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers, with no more authentication. This vulnerability results from user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions, and copying it to a fixed-length stack-based buffer. Attacker can overwrite the return address and redirect instruction pointer to a malicious shellcode.</p></div><div class="post-footer">
+CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.</p></div><div class="post-footer">
         <a href="/posts/cve_2022_24355/">Read More</a></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/posts/dhctf%237r5/">Dreamhack CTF Season 7 Round #5 (🚩Div1)</a>
