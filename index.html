@@ -134,26 +134,6 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         title="alt text" /></p></div><div class="post-footer">
         <a href="/posts/dhctf%237r5/">Read More</a></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/research/">Research: Packing và Unpacking trong reverse engineering</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><blockquote>
-<p>SLIDE bài thuyết trình: <a href="https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&amp;utm_campaign=designshare&amp;utm_medium=link2&amp;utm_source=sharebutton" target="_blank" rel="noopener noreffer ">https://www.canva.com/design/DAGiMR6Qp0U/OkIupXHYFkij3xmruojTrQ/edit?utm_content=DAGiMR6Qp0U&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton</a></p></blockquote>
-<p>Packing là một trong những kỹ thuật cơ bản về bảo vệ file. Đối với các reverser, unpacking là công cụ đắc lực để vượt qua kỹ thuật anti-reverse khá mạnh mẽ này. Hầu hết mọi thứ về phương pháp phân tích thì đều có ở trong slide trên, bài viết này của mình sẽ chỉ tóm tắt lại ý chính từ bài thuyết trình.</p></div><div class="post-footer">
-        <a href="/posts/research/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/squirrel/">squ1rrel CTF 2025</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>squ1rrel là một giải khá ít challenge rev, chỉ có 3 bài. Mình tham gia giải này song song Breach nên cũng chỉ kịp đóng góp cho team 1 bài.</p>
-<h2 id="intermediate-software-design---reverse-engineering">Intermediate Software Design - reverse engineering</h2>
-<h3 id="1-static-analysis">1. Static Analysis</h3>
-<p>Chương trình chỉ gồm có duy nhất 1 hàm main, nhận input và xử lý nó. Logic xử lý của chương trình lại không quá phức tạp, nó chủ yếu nằm ở đoạn sau.</p></div><div class="post-footer">
-        <a href="/posts/squirrel/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/posts/breach/">Breach CTF 2025</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Breach có lẽ là giải khá khó chịu với mình vì không có nhiều chall thuần về reversing logic và xác định luồng truyền thống, mặt khác nó lại có phần tricky ở nhiều chall. Ở giải này chỉ có mình mình giải 1 chall.</p>
-<h2 id="fraction-fun---rev">Fraction Fun - rev</h2>
-<h3 id="1-analysis">1. Analysis</h3>
-<p>Chall cho biết file mã nguồn của chương trình xác thực trên server. Cần phải nhập chính xác số cần nhập để sau các phép biến đổi, kết quả sẽ bằng kết quả trong output.txt. Logic chương trình khá đơn giản, chỉ là vòng lặp sau.</p></div><div class="post-footer">
-        <a href="/posts/breach/">Read More</a></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/posts/htb/">Hackthebox: Cyber Apocalypse CTF 2025: Tales from Eldoria</a>
     </h1><div class="post-meta"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span>&nbsp;<span class="post-publish">published on <time datetime="2025-04-16">2025-04-16</time></span></div><div class="content"><p>Như mọi khi, hackthebox luôn mang đến cho chúng ta giải CTF khá chất lượng về độ phân loại, phù hợp cho cả beginner và người đã có kinh nghiệm. Ở giải này những challenge easy và very easy đều quá dễ nên mình sẽ chỉ viết writeup challenge mức độ medium mình giải được.</p>
 <h1 id="writeup">Writeup</h1>
@@ -161,15 +141,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
 <h3 id="1-static-analysis">1. Static Analysis</h3>
 <p>Load file vào IDA, chúng ta nhận thấy hàm hàm main call đến một hàm loc_5555555583E0 nào đấy. Vào trong hàm bên trong hàm này kiểm tra.</p></div><div class="post-footer">
         <a href="/posts/htb/">Read More</a></div>
-</article><ul class="pagination"><li class="page-item active">
-                    <span class="page-link">
-                        <a href="/">1</a>
-                    </span>
-                </li><li class="page-item ">
-                    <span class="page-link">
-                        <a href="/page/2/">2</a>
-                    </span>
-                </li></ul></div></div>
+</article></div></div>
             </main><footer class="footer">
         <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2024 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/yourusername" target="_blank">cr0nica1</a></span>&nbsp;|&nbsp;<span class="license">Content licensed by cr0nica1</span></div>
         </div>
