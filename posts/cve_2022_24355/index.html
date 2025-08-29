@@ -4,9 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noodp" />
-        <title>Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355) - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/cve_2022_24355/">
+        <title>Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N - Cr0nica1</title><meta name="Description" content="Research blog about CTF, Web Security, and Reverse Engineering"><meta property="og:url" content="https://cr0nica1.github.io/posts/cve_2022_24355/">
   <meta property="og:site_name" content="Cr0nica1">
-  <meta property="og:title" content="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
+  <meta property="og:title" content="Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N">
   <meta property="og:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
@@ -15,7 +15,7 @@
     <meta property="article:modified_time" content="2025-08-02T20:56:05+07:00">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
+  <meta name="twitter:title" content="Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N">
   <meta name="twitter:description" content="About TP-Link TL-WR940N and the vulnerability The TP-Link TL-WR940N is a widely used wireless router known for its affordability and basic home networking features. In this article, i will reproduce CVE-2022-24355, a critical vulnerability on TL-WR940N firmware version 200316 and lower. CVE-2022-24355 allows attackers to execute malicious code on affected installations of TP-Link TL-WR940N routers without requiring additional authentication. This vulnerability results from a user-supplied data mechanism: when parsing file extensions, this mechanism does not check the length of file name extensions. It copies them to a fixed-length stack-based buffer. An attacker can overwrite the return address and redirect the instruction pointer to a malicious shellcode.">
 <meta name="application-name" content="Cr0nica1">
 <meta name="apple-mobile-web-app-title" content="Cr0nica1"><meta name="theme-color" content="#000000"><meta name="msapplication-TileColor" content="#111111"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00ffff"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://cr0nica1.github.io/posts/cve_2022_24355/" /><link rel="prev" href="https://cr0nica1.github.io/posts/dhctf%237r5/" /><link rel="stylesheet" href="/css/style.min.49088c0fd33ec2f46f197451ea52e0cafa9bc6da2935c1144274ca89e79def3ed9f0c56fa78d4677d7a18208583ff518a21f8e035769334b81410737214c5443.css" integrity="sha512-SQiMD9M+wvRvGXRR6lLgyvqbxtopNcEUQnTKieed7z7Z8MVvp41Gd9ehgghYP/UYoh+OA1dpM0uBQQc3IUxUQw=="><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -24,7 +24,7 @@
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
-        "headline": "Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)",
+        "headline": "Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N",
         "inLanguage": "en-us",
         "mainEntityOfPage": {
             "@type": "WebPage",
@@ -101,10 +101,10 @@
                 <div class="container"><div class="toc" id="toc-auto">
             <h2 class="toc-title">Contents</h2>
             <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</h1><div class="post-meta">
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="https://github.com/yourusername" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>cr0nica1</a></span></div>
             <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2025-08-02">2025-08-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;704 words&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;<span id="/posts/cve_2022_24355/" class="leancloud_visitors" data-flag-title="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)">
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;4 minutes&nbsp;<span id="/posts/cve_2022_24355/" class="leancloud_visitors" data-flag-title="Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N">
                         <i class="far fa-eye fa-fw" aria-hidden="true"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;views
                     </span>&nbsp;</div>
         </div><div class="details toc" id="toc-static"  data-kept="">
@@ -283,7 +283,7 @@ CVE-2022-24355 allows attackers to execute malicious code on affected installati
         <div class="post-info-line">
             <div class="post-info-md"></div>
             <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/" data-title="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/" data-title="Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/" data-title="Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/" data-title="Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Reddit" data-sharer="reddit" data-url="https://cr0nica1.github.io/posts/cve_2022_24355/"><i class="fab fa-reddit fa-fw" aria-hidden="true"></i></a></span>
             </div>
         </div>
     </div>

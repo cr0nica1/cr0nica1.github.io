@@ -7,7 +7,7 @@
             <webMaster>minhtoanlamson2005@gmail.com (cr0nica1)</webMaster><lastBuildDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</lastBuildDate>
             <atom:link href="https://cr0nica1.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
-    <title>Reproducing a Buffer Overflow RCE Vulnerability on TP-Link TL-WR940N (CVE-2022-24355)</title>
+    <title>Research: Reproducing CVE-2022-24355 on TP-Link TL-WR940N</title>
     <link>https://cr0nica1.github.io/posts/cve_2022_24355/</link>
     <pubDate>Sat, 02 Aug 2025 20:56:05 &#43;0700</pubDate>
     <author>cr0nica1</author>
